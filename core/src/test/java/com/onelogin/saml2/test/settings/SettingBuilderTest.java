@@ -156,6 +156,7 @@ public class SettingBuilderTest {
 		assertFalse(setting.getWantNameIdEncrypted());
 		assertTrue(setting.getRequestedAuthnContext().isEmpty());
 		assertEquals("exact", setting.getRequestedAuthnContextComparison());
+		assertTrue(setting.getRequestedAuthnContextDeclRef().isEmpty());
 		assertTrue(setting.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA1, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA1, setting.getDigestAlgorithm());
@@ -212,6 +213,7 @@ public class SettingBuilderTest {
 		assertFalse(setting.getWantNameIdEncrypted());
 		assertTrue(setting.getRequestedAuthnContext().isEmpty());
 		assertEquals("exact", setting.getRequestedAuthnContextComparison());
+		assertTrue(setting.getRequestedAuthnContextDeclRef().isEmpty());
 		assertTrue(setting.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA1, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA1, setting.getDigestAlgorithm());
@@ -273,6 +275,12 @@ public class SettingBuilderTest {
 		reqAuthContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
 		assertEquals(reqAuthContext, setting.getRequestedAuthnContext());
 		assertEquals("exact", setting.getRequestedAuthnContextComparison());
+
+		List<String> requestedAuthnContextDeclRef = new ArrayList<>();
+		requestedAuthnContextDeclRef.add("http://example.com/");
+		requestedAuthnContextDeclRef.add("http://acme.com/");
+		assertEquals(requestedAuthnContextDeclRef,setting.getRequestedAuthnContextDeclRef());
+
 		assertTrue(setting.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA512, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA512, setting.getDigestAlgorithm());
@@ -564,6 +572,11 @@ public class SettingBuilderTest {
 		reqAuthContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
 		assertEquals(reqAuthContext, setting.getRequestedAuthnContext());
 		assertEquals("minimum", setting.getRequestedAuthnContextComparison());
+
+		List<String> requestedAuthnContextDeclRef = new ArrayList<>();
+		requestedAuthnContextDeclRef.add("http://example.com/");
+		assertEquals(requestedAuthnContextDeclRef,setting.getRequestedAuthnContextDeclRef());
+
 		assertTrue(setting.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA512, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA512, setting.getDigestAlgorithm());
@@ -657,6 +670,7 @@ public class SettingBuilderTest {
 		assertFalse(setting2.getWantNameIdEncrypted());
 		assertTrue(setting2.getRequestedAuthnContext().isEmpty());
 		assertEquals("exact", setting2.getRequestedAuthnContextComparison());
+		assertTrue(setting2.getRequestedAuthnContextDeclRef().isEmpty());
 		assertTrue(setting2.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA1, setting2.getSignatureAlgorithm());
 		assertEquals(Constants.SHA1, setting2.getDigestAlgorithm());
@@ -719,6 +733,7 @@ public class SettingBuilderTest {
 		samlData.put(SECURITY_WANT_NAMEID_ENCRYPTED, "true");
 		samlData.put(SECURITY_REQUESTED_AUTHNCONTEXT, Arrays.asList("urn:oasis:names:tc:SAML:2.0:ac:classes:urn:oasis:names:tc:SAML:2.0:ac:classes:Password"));
 		samlData.put(SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON, "exact");
+		samlData.put(SECURITY_REQUESTED_AUTHNCONTEXTDECLREF,Arrays.asList("http://example.com/"));
 		samlData.put(SECURITY_WANT_XML_VALIDATION, "true");
 		samlData.put(SECURITY_SIGNATURE_ALGORITHM, "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512");
 		samlData.put(SECURITY_DIGEST_ALGORITHM, "http://www.w3.org/2001/04/xmlenc#sha512");
@@ -784,6 +799,11 @@ public class SettingBuilderTest {
 		reqAuthContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
 		assertEquals(reqAuthContext, setting.getRequestedAuthnContext());
 		assertEquals("exact", setting.getRequestedAuthnContextComparison());
+
+		List<String> requestedAuthnContextDeclRefs = new ArrayList<>();
+		requestedAuthnContextDeclRefs.add("http://example.com/");
+		assertEquals(requestedAuthnContextDeclRefs,setting.getRequestedAuthnContextDeclRef());
+
 		assertTrue(setting.getWantXMLValidation());
 		assertEquals(Constants.RSA_SHA512, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA512, setting.getDigestAlgorithm());

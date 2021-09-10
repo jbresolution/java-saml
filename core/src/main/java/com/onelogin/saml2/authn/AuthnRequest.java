@@ -229,12 +229,17 @@ public class AuthnRequest {
 
 		String requestedAuthnContextStr = "";
 		List<String> requestedAuthnContexts = settings.getRequestedAuthnContext();
-		if (requestedAuthnContexts != null && !requestedAuthnContexts.isEmpty()) {
+		List<String> requestedAuthnContextDeclRefs = settings.getRequestedAuthnContextDeclRef();
+		if ((requestedAuthnContexts != null && !requestedAuthnContexts.isEmpty()) || (requestedAuthnContextDeclRefs != null && !requestedAuthnContextDeclRefs.isEmpty())) {
 			String requestedAuthnContextCmp = settings.getRequestedAuthnContextComparison();
 			requestedAuthnContextStr = "<samlp:RequestedAuthnContext Comparison=\"" + requestedAuthnContextCmp + "\">";
 			for (String requestedAuthnContext : requestedAuthnContexts) {
 				requestedAuthnContextStr += "<saml:AuthnContextClassRef>" + requestedAuthnContext + "</saml:AuthnContextClassRef>";
 			}
+			for (String requestedAuthnContextDeclRef : requestedAuthnContextDeclRefs) {
+				requestedAuthnContextStr += "<saml:AuthnContextDeclRef>" + requestedAuthnContextDeclRef + "</saml:AuthnContextDeclRef>";
+			}
+
 			requestedAuthnContextStr += "</samlp:RequestedAuthnContext>";
 		}
 
