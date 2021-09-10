@@ -112,6 +112,7 @@ public class SettingsBuilder {
 	public final static String SECURITY_WANT_NAMEID_ENCRYPTED = "onelogin.saml2.security.want_nameid_encrypted";
 	public final static String SECURITY_SIGN_METADATA = "onelogin.saml2.security.sign_metadata";
 	public final static String SECURITY_REQUESTED_AUTHNCONTEXT = "onelogin.saml2.security.requested_authncontext";
+	public final static String SECURITY_REQUESTED_AUTHNCONTEXTDECLREF = "onelogin.saml2.security.requested_authncontextdeclref";
 	public final static String SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON = "onelogin.saml2.security.requested_authncontextcomparison";
 	public final static String SECURITY_WANT_XML_VALIDATION = "onelogin.saml2.security.want_xml_validation";
 	public final static String SECURITY_SIGNATURE_ALGORITHM = "onelogin.saml2.security.signature_algorithm";
@@ -406,6 +407,11 @@ public class SettingsBuilder {
 		List<String> requestedAuthnContext = loadListProperty(SECURITY_REQUESTED_AUTHNCONTEXT);
 		if (requestedAuthnContext != null)
 			saml2Setting.setRequestedAuthnContext(requestedAuthnContext);
+
+		List<String> requestedAuthnContextDeclRef = loadListProperty(SECURITY_REQUESTED_AUTHNCONTEXTDECLREF);
+		if (requestedAuthnContextDeclRef != null) {
+			saml2Setting.setRequestedAuthnContextDeclRef(requestedAuthnContextDeclRef);
+		}
 
 		String requestedAuthnContextComparison = loadStringProperty(SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON);
 		if (requestedAuthnContextComparison != null && !requestedAuthnContextComparison.isEmpty())
