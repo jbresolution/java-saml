@@ -359,6 +359,7 @@ public class AuthnRequestTest {
 		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
 		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
 		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, not(containsString("<saml:AuthnContextDeclRef")));
 
 		requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
 		settings.setRequestedAuthnContext(requestedAuthnContext);
@@ -370,6 +371,34 @@ public class AuthnRequestTest {
 		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
 		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
 		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, not(containsString("<saml:AuthnContextDeclRef")));
+
+		List<String> requestedAuthnContextDeclRefs = new ArrayList<>();
+		requestedAuthnContextDeclRefs.add("http://example.com/");
+		settings.setRequestedAuthnContextDeclRef(requestedAuthnContextDeclRefs);
+
+		authnRequest = new AuthnRequest(settings);
+		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextDeclRef>http://example.com/</saml:AuthnContextDeclRef>"));
+
+		requestedAuthnContextDeclRefs.add("http://acme.com/");
+		settings.setRequestedAuthnContextDeclRef(requestedAuthnContextDeclRefs);
+
+		authnRequest = new AuthnRequest(settings);
+		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextDeclRef>http://example.com/</saml:AuthnContextDeclRef>"));
+		assertThat(authnRequestStr, containsString("<saml:AuthnContextDeclRef>http://acme.com/</saml:AuthnContextDeclRef>"));
+
 	}
 
 	/**
