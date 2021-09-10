@@ -70,6 +70,8 @@ public class Saml2Settings {
 	private boolean wantNameIdEncrypted = false;
 	private boolean signMetadata = false;
 	private List<String> requestedAuthnContext = new ArrayList<>();
+	private List<String> requestedAuthnContextDeclRef = new ArrayList<>();
+
 	private String requestedAuthnContextComparison = "exact";
 	private boolean wantXMLValidation = true;
 	private String signatureAlgorithm = Constants.RSA_SHA1;
@@ -333,6 +335,11 @@ public class Saml2Settings {
 	 */
 	public String getRequestedAuthnContextComparison() {
 		return requestedAuthnContextComparison;
+	}
+
+	public List<String> getRequestedAuthnContextDeclRef() {
+		return requestedAuthnContextDeclRef;
+
 	}
 
 	/**
@@ -760,6 +767,18 @@ public class Saml2Settings {
 	 */
 	public void setRequestedAuthnContextComparison(String requestedAuthnContextComparison) {
 		this.requestedAuthnContextComparison = requestedAuthnContextComparison;
+	}
+
+	/**
+	 * Set the requestedAuthnContextDeclRef setting value
+	 *
+	 * @param requestedAuthnContextDeclRef
+	 *   the requestedAuthnContextDeclRef value to be set on the AuthNRequest.
+	 */
+	public void setRequestedAuthnContextDeclRef(List<String> requestedAuthnContextDeclRef) {
+		if (requestedAuthnContextDeclRef != null) {
+			this.requestedAuthnContextDeclRef = requestedAuthnContextDeclRef;
+		}
 	}
 
 	/**
