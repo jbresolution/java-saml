@@ -251,7 +251,17 @@ public class AuthnRequest {
 		valueMap.put("issueInstant", issueInstantString);
 		valueMap.put("id", Util.toXml(String.valueOf(id)));
 		valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(settings.getSpAssertionConsumerServiceUrl())));
-		valueMap.put("protocolBinding", Util.toXml(settings.getSpAssertionConsumerServiceBinding()));
+
+		String protocolBindingString = " ";
+		if(params.isIncludeProtocolBinding()) {
+			String protocolBinding = params.getProtocolBinding();
+			if(protocolBinding == null) {
+				protocolBinding = settings.getSpAssertionConsumerServiceBinding();
+			}
+			protocolBindingString = " ProtocolBinding=\"" + Util.toXml(protocolBinding) + "\" ";
+		}
+		valueMap.put("protocolBindingStr", protocolBindingString);
+
 		valueMap.put("spEntityid", Util.toXml(settings.getSpEntityId()));
 
 		String requestedAuthnContextStr = "";
@@ -280,7 +290,7 @@ public class AuthnRequest {
 	 */
 	private static StringBuilder getAuthnRequestTemplate() {
 		StringBuilder template = new StringBuilder();
-		template.append("<samlp:AuthnRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"${id}\" Version=\"2.0\" IssueInstant=\"${issueInstant}\"${providerStr}${forceAuthnStr}${isPassiveStr}${destinationStr} ProtocolBinding=\"${protocolBinding}\" AssertionConsumerServiceURL=\"${assertionConsumerServiceURL}\">");
+		template.append("<samlp:AuthnRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"${id}\" Version=\"2.0\" IssueInstant=\"${issueInstant}\"${providerStr}${forceAuthnStr}${isPassiveStr}${destinationStr}${protocolBindingStr}AssertionConsumerServiceURL=\"${assertionConsumerServiceURL}\">");
 		template.append("<saml:Issuer>${spEntityid}</saml:Issuer>");
 		template.append("${subjectStr}${nameIDPolicyStr}${requestedAuthnContextStr}</samlp:AuthnRequest>");
 		return template;

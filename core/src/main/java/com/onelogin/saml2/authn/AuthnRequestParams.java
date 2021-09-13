@@ -28,6 +28,13 @@ public class AuthnRequestParams {
 	private final String nameIdValueReq;
 
 	/**
+	 * ProtocolBinding to be set in the AuthnRequest.
+	 */
+	private final String protocolBinding;
+
+	private final boolean includeProtocolBinding;
+
+	/**
 	 * Create a set of authentication request input parameters.
 	 *
 	 * @param forceAuthn
@@ -61,7 +68,7 @@ public class AuthnRequestParams {
 	 *              <code>true</code>
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate) {
-		this(forceAuthn, isPassive, setNameIdPolicy, allowCreate, null);
+		this(forceAuthn, isPassive, setNameIdPolicy, allowCreate, null,null,true);
 	}
 
 	/**
@@ -79,7 +86,7 @@ public class AuthnRequestParams {
 	 *              the subject that should be authenticated
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, String nameIdValueReq) {
-		this(forceAuthn, isPassive, setNameIdPolicy, true, nameIdValueReq);
+		this(forceAuthn, isPassive, setNameIdPolicy, true, nameIdValueReq,null,true);
 	}
 
 	/**
@@ -100,14 +107,19 @@ public class AuthnRequestParams {
 	 *              <code>setNameIdPolicy</code> is <code>true</code>
 	 * @param nameIdValueReq
 	 *              the subject that should be authenticated
+	 * @param protocolBinding
+	 * 				ProtocolBinding in the request. <code>null</code> means to us the value from the Setting
+	 *
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate,
-	            String nameIdValueReq) {
+	            String nameIdValueReq, String protocolBinding, boolean includeProtocolBinding) {
 		this.forceAuthn = forceAuthn;
 		this.isPassive = isPassive;
 		this.setNameIdPolicy = setNameIdPolicy;
 		this.allowCreate = allowCreate;
 		this.nameIdValueReq = nameIdValueReq;
+		this.protocolBinding = protocolBinding;
+		this.includeProtocolBinding = includeProtocolBinding;
 	}
 
 	/**
@@ -123,6 +135,8 @@ public class AuthnRequestParams {
 		this.setNameIdPolicy = source.isSetNameIdPolicy();
 		this.allowCreate = source.isAllowCreate();
 		this.nameIdValueReq = source.getNameIdValueReq();
+		this.protocolBinding = source.getProtocolBinding();
+		this.includeProtocolBinding = source.isIncludeProtocolBinding();
 	}
 
 	/**
@@ -162,5 +176,16 @@ public class AuthnRequestParams {
 	 */
 	protected String getNameIdValueReq() {
 		return nameIdValueReq;
+	}
+
+	/**
+	 * @return the ProtocolBinding-value, may be null
+	 */
+	public String getProtocolBinding() {
+		return protocolBinding;
+	}
+
+	public boolean isIncludeProtocolBinding() {
+		return includeProtocolBinding;
 	}
 }
