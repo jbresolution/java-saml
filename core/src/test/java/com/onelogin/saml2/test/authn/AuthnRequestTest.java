@@ -629,4 +629,36 @@ public class AuthnRequestTest {
 		};
 		assertEquals("changed", authnRequest.getAuthnRequestXml());
 	}
+
+	@Test
+	public void testIncludeProtocolBinding() throws Exception {
+		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+		String defaultBinding = settings.getSpAssertionConsumerServiceBinding();
+
+		// AuthnRequest must not contain a ProtocolBinding-attribute
+		AuthnRequestParams params = new AuthnRequestParams(false,false,false,true,null,null,false);
+		AuthnRequest authnRequest = new AuthnRequest(settings,params);
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"")));
+
+		// AuthnRequest must contain the ProtocolBinding from setting if includeProtocolValue is true and protocolBinding is null
+		params = new AuthnRequestParams(false,false,false,true,null,null,true);
+		authnRequest = new AuthnRequest(settings,params);
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
+
+		// AuthnRequest must contain the ProtocolBinding from parameter
+		params = new AuthnRequestParams(false,false,false,true,null,"testBindingValue",true);
+		authnRequest = new AuthnRequest(settings,params);
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"testBindingValue\""));
+
+		// AuthnRequest must not contain the ProtocolBinding from parameter if includeProtocolBinding is false
+		params = new AuthnRequestParams(false,false,false,true,null,"testBindingValue",false);
+		authnRequest = new AuthnRequest(settings,params);
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"testBindingValue\"")));
+
+		// AuthnRequest must contain the ProtocolBinding from setting when using simpler constructor
+		params = new AuthnRequestParams(false,false,false);
+		authnRequest = new AuthnRequest(settings,params);
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
+
+	}
 }
