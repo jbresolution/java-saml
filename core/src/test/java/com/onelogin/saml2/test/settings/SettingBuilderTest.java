@@ -162,6 +162,9 @@ public class SettingBuilderTest {
 		assertEquals(Constants.SHA1, setting.getDigestAlgorithm());
 		assertFalse(setting.getSignMetadata());
 
+		assertFalse(setting.isTrimNameIds());
+		assertFalse(setting.isTrimAttributeValues());
+
 		assertNull(setting.getOrganization());
 		assertTrue(setting.getContacts().isEmpty());
 	}
@@ -218,6 +221,9 @@ public class SettingBuilderTest {
 		assertEquals(Constants.RSA_SHA1, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA1, setting.getDigestAlgorithm());
 		assertFalse(setting.getSignMetadata());
+		
+		assertFalse(setting.isTrimNameIds());
+		assertFalse(setting.isTrimAttributeValues());
 
 		assertNull(setting.getOrganization());
 		assertTrue(setting.getContacts().isEmpty());
@@ -285,6 +291,9 @@ public class SettingBuilderTest {
 		assertEquals(Constants.RSA_SHA512, setting.getSignatureAlgorithm());
 		assertEquals(Constants.SHA512, setting.getDigestAlgorithm());
 		assertTrue(setting.getSignMetadata());
+
+		assertFalse(setting.isTrimNameIds());
+		assertFalse(setting.isTrimAttributeValues());
 
 		Organization org = new Organization("SP Java", "SP Java Example", "http://sp.example.com");
 		assertTrue(org.equalsTo(setting.getOrganization()));
@@ -582,6 +591,9 @@ public class SettingBuilderTest {
 		assertEquals(Constants.SHA512, setting.getDigestAlgorithm());
 		assertTrue(setting.getSignMetadata());
 
+		assertTrue(setting.isTrimNameIds());
+		assertTrue(setting.isTrimAttributeValues());
+
 		Organization org = new Organization("SP Java", "", "");
 		assertTrue(org.equalsTo(setting.getOrganization()));
 
@@ -676,6 +688,9 @@ public class SettingBuilderTest {
 		assertEquals(Constants.SHA1, setting2.getDigestAlgorithm());
 		assertFalse(setting2.getSignMetadata());
 
+		assertFalse(setting.isTrimNameIds());
+		assertFalse(setting.isTrimAttributeValues());
+
 		assertNull(setting2.getOrganization());
 		assertTrue(setting2.getContacts().isEmpty());
 
@@ -741,6 +756,10 @@ public class SettingBuilderTest {
 		// Compress
 		samlData.put(COMPRESS_REQUEST, "false");
 		samlData.put(COMPRESS_RESPONSE, "false");
+		
+		// Parsing
+		samlData.put(PARSING_TRIM_NAME_IDS, "true");
+		samlData.put(PARSING_TRIM_ATTRIBUTE_VALUES, "true");
 
 		// Organization
 		samlData.put(ORGANIZATION_NAME, "SP Java");
@@ -812,6 +831,9 @@ public class SettingBuilderTest {
 
 		assertFalse(setting.isCompressRequestEnabled());
 		assertFalse(setting.isCompressResponseEnabled());
+		
+		assertTrue(setting.isTrimNameIds());
+		assertTrue(setting.isTrimAttributeValues());
 
 		Organization org = new Organization("SP Java", "SP Java Example", "http://sp.example.com");
 		assertTrue(org.equalsTo(setting.getOrganization()));
@@ -904,6 +926,10 @@ public class SettingBuilderTest {
 		samlData.put(COMPRESS_REQUEST, "false");
 		samlData.put(COMPRESS_RESPONSE, "false");
 
+		// Parsing
+		samlData.put(PARSING_TRIM_NAME_IDS, "true");
+		samlData.put(PARSING_TRIM_ATTRIBUTE_VALUES, "true");
+
 		// Organization
 		samlData.put(ORGANIZATION_NAME, "SP Java");
 		samlData.put(ORGANIZATION_DISPLAYNAME, "SP Java Example");
@@ -961,6 +987,9 @@ public class SettingBuilderTest {
 
 		assertFalse(setting.isCompressRequestEnabled());
 		assertFalse(setting.isCompressResponseEnabled());
+
+		assertTrue(setting.isTrimNameIds());
+		assertTrue(setting.isTrimAttributeValues());
 
 		Organization org = new Organization("SP Java", "SP Java Example", "http://sp.example.com");
 		assertTrue(org.equalsTo(setting.getOrganization()));

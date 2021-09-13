@@ -14,6 +14,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import com.onelogin.saml2.model.hsm.HSM;
+
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
@@ -189,9 +191,9 @@ public class SamlResponse {
 			Element rootElement = samlResponseDocument.getDocumentElement();
 			rootElement.normalize();
 
-			// Check SAML version
+			// Check SAML version on the response
 			if (!"2.0".equals(rootElement.getAttribute("Version"))) {
-				throw new ValidationError("Unsupported SAML Version.", ValidationError.UNSUPPORTED_SAML_VERSION);
+				throw new ValidationError("Unsupported SAML Version on Response.", ValidationError.UNSUPPORTED_SAML_VERSION);
 			}
 
 			// Check ID in the response
@@ -237,6 +239,13 @@ public class SamlResponse {
 				if (requestId != null && !Objects.equals(responseInResponseTo, requestId)) {
 						throw new ValidationError("The InResponseTo of the Response: " + responseInResponseTo
 								+ ", does not match the ID of the AuthNRequest sent by the SP: " + requestId, ValidationError.WRONG_INRESPONSETO);
+				}
+
+				// Check SAML version on the assertion
+				NodeList assertions = queryAssertion("");
+				Node versionAttribute = assertions.item(0).getAttributes().getNamedItem("Version");
+				if (versionAttribute == null || !"2.0".equals(versionAttribute.getNodeValue())) {
+					throw new ValidationError("Unsupported SAML Version on Assertion.", ValidationError.UNSUPPORTED_SAML_VERSION);
 				}
 
 				if (!this.encrypted && settings.getWantAssertionsEncrypted()) {
@@ -469,7 +478,10 @@ public class SamlResponse {
 
 			if (nameIdElem != null) {
 				String value = nameIdElem.getTextContent();
-				if (settings.isStrict() && value.isEmpty()) {
+				if(value != null && settings.isTrimNameIds()) {
+					value = value.trim();
+				}
+				if (settings.isStrict() && StringUtils.isEmpty(value)) {
 					throw new ValidationError("An empty NameID value found", ValidationError.EMPTY_NAMEID);
 				}
 
@@ -596,7 +608,11 @@ public class SamlResponse {
 				}
 				for (int j = 0; j < childrens.getLength(); j++) {
 					if ("AttributeValue".equals(childrens.item(j).getLocalName())) {
-						attrValues.add(childrens.item(j).getTextContent());
+						String attrValue = childrens.item(j).getTextContent();
+						if(attrValue != null && settings.isTrimAttributeValues()) {
+							attrValue = attrValue.trim();
+						}
+						attrValues.add(attrValue);
 					}
 				}
 
@@ -699,8 +715,11 @@ public class SamlResponse {
 		for (int i = 0; i < entries.getLength(); i++) {
 			if (entries.item(i) != null) {
 				String value = entries.item(i).getTextContent();
-				if (value != null && !value.trim().isEmpty()) {
-					audiences.add(value.trim());
+				if(value != null) {
+					value = value.trim();
+				}
+				if(!StringUtils.isEmpty(value)) {
+					audiences.add(value);
 				}
 			}
 		}
@@ -722,7 +741,11 @@ public class SamlResponse {
 		NodeList responseIssuer = Util.query(samlResponseDocument, "/samlp:Response/saml:Issuer");
 		if (responseIssuer.getLength() > 0) {
 			if (responseIssuer.getLength() == 1) {
-				return responseIssuer.item(0).getTextContent();
+				String value = responseIssuer.item(0).getTextContent();
+				if(value != null && settings.isTrimNameIds()) {
+					value = value.trim();
+				}
+				return value;
 			} else {
 				throw new ValidationError("Issuer of the Response is multiple.", ValidationError.ISSUER_MULTIPLE_IN_RESPONSE);
 			}
@@ -745,7 +768,11 @@ public class SamlResponse {
 	public String getAssertionIssuer() throws XPathExpressionException, ValidationError {
 		NodeList assertionIssuer = this.queryAssertion("/saml:Issuer");
 		if (assertionIssuer.getLength() == 1) {
-			return assertionIssuer.item(0).getTextContent();
+			String value = assertionIssuer.item(0).getTextContent();
+			if(value != null && settings.isTrimNameIds()) {
+				value = value.trim();
+			}
+			return value;
 		} else {
 			throw new ValidationError("Issuer of the Assertion not found or multiple.", ValidationError.ISSUER_NOT_FOUND_IN_ASSERTION);
 		}

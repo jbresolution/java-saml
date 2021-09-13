@@ -77,7 +77,7 @@ public class Metadata {
 		this.cacheDuration = cacheDuration;
 
 		StrSubstitutor substitutor = generateSubstitutor(settings);
-		String unsignedMetadataString = substitutor.replace(getMetadataTemplate());
+		String unsignedMetadataString = postProcessXml(substitutor.replace(getMetadataTemplate()), settings);
 
 		LOGGER.debug("metadata --> " + unsignedMetadataString);
 		metadataString = unsignedMetadataString;
@@ -109,10 +109,30 @@ public class Metadata {
 		this.cacheDuration = SECONDS_CACHED;
 
 		StrSubstitutor substitutor = generateSubstitutor(settings);
-		String unsignedMetadataString = substitutor.replace(getMetadataTemplate());
+		String unsignedMetadataString = postProcessXml(substitutor.replace(getMetadataTemplate()), settings);
 
 		LOGGER.debug("metadata --> " + unsignedMetadataString);
 		metadataString = unsignedMetadataString;
+	}
+	
+	/**
+	 * Allows for an extension class to post-process the SAML metadata XML generated
+	 * for this metadata instance, in order to customize the result.
+	 * <p>
+	 * This method is invoked at construction time, after all the other fields of
+	 * this class have already been initialised. Its default implementation simply
+	 * returns the input XML as-is, with no change.
+	 * 
+	 * @param metadataXml
+	 *              the XML produced for this metadata instance by the standard
+	 *              implementation provided by {@link Metadata}
+	 * @param settings
+	 *              the settings
+	 * @return the post-processed XML for this metadata instance, which will then be
+	 *         returned by any call to {@link #getMetadataString()}
+	 */
+	protected String postProcessXml(final String metadataXml, final Saml2Settings settings) {
+		return metadataXml;
 	}
 
 	/**
@@ -126,7 +146,7 @@ public class Metadata {
 		Map<String, String> valueMap = new HashMap<String, String>();
 		Boolean wantsEncrypted = settings.getWantAssertionsEncrypted() || settings.getWantNameIdEncrypted();
 
-		valueMap.put("id", Util.generateUniqueID(settings.getUniqueIDPrefix()));
+		valueMap.put("id", Util.toXml(Util.generateUniqueID(settings.getUniqueIDPrefix())));
 		String validUntilTimeStr = "";
 		if (validUntilTime != null) {
 			String validUntilTimeValue = Util.formatDateTime(validUntilTime.getTimeInMillis());
@@ -141,12 +161,12 @@ public class Metadata {
 		}
 		valueMap.put("cacheDurationStr", cacheDurationStr);
 
-		valueMap.put("spEntityId", settings.getSpEntityId());
+		valueMap.put("spEntityId", Util.toXml(settings.getSpEntityId()));
 		valueMap.put("strAuthnsign", String.valueOf(settings.getAuthnRequestsSigned()));
 		valueMap.put("strWsign", String.valueOf(settings.getWantAssertionsSigned()));
-		valueMap.put("spNameIDFormat", settings.getSpNameIDFormat());
-		valueMap.put("spAssertionConsumerServiceBinding", settings.getSpAssertionConsumerServiceBinding());
-		valueMap.put("spAssertionConsumerServiceUrl", settings.getSpAssertionConsumerServiceUrl().toString());
+		valueMap.put("spNameIDFormat", Util.toXml(settings.getSpNameIDFormat()));
+		valueMap.put("spAssertionConsumerServiceBinding", Util.toXml(settings.getSpAssertionConsumerServiceBinding()));
+		valueMap.put("spAssertionConsumerServiceUrl", Util.toXml(settings.getSpAssertionConsumerServiceUrl().toString()));
 		valueMap.put("sls", toSLSXml(settings.getSpSingleLogoutServiceUrl(), settings.getSpSingleLogoutServiceBinding()));
 
 		valueMap.put("strAttributeConsumingService", getAttributeConsumingServiceXml());
@@ -198,10 +218,10 @@ public class Metadata {
 
 			attributeConsumingServiceXML.append("<md:AttributeConsumingService index=\"1\">");
 			if (serviceName != null && !serviceName.isEmpty()) {
-				attributeConsumingServiceXML.append("<md:ServiceName xml:lang=\"en\">" + serviceName + "</md:ServiceName>");
+				attributeConsumingServiceXML.append("<md:ServiceName xml:lang=\"en\">" + Util.toXml(serviceName) + "</md:ServiceName>");
 			}
 			if (serviceDescription != null && !serviceDescription.isEmpty()) {
-				attributeConsumingServiceXML.append("<md:ServiceDescription xml:lang=\"en\">" + serviceDescription + "</md:ServiceDescription>");
+				attributeConsumingServiceXML.append("<md:ServiceDescription xml:lang=\"en\">" + Util.toXml(serviceDescription) + "</md:ServiceDescription>");
 			}
 			if (requestedAttributes != null && !requestedAttributes.isEmpty()) {
 				for (RequestedAttribute requestedAttribute : requestedAttributes) {
@@ -214,15 +234,15 @@ public class Metadata {
 					String contentStr = "<md:RequestedAttribute";
 
 					if (name != null && !name.isEmpty()) {
-						contentStr += " Name=\"" + name + "\"";
+						contentStr += " Name=\"" + Util.toXml(name) + "\"";
 					}
 
 					if (nameFormat != null && !nameFormat.isEmpty()) {
-						contentStr += " NameFormat=\"" + nameFormat + "\"";
+						contentStr += " NameFormat=\"" + Util.toXml(nameFormat) + "\"";
 					}
 
 					if (friendlyName != null && !friendlyName.isEmpty()) {
-						contentStr += " FriendlyName=\"" + friendlyName + "\"";
+						contentStr += " FriendlyName=\"" + Util.toXml(friendlyName) + "\"";
 					}
 
 					if (isRequired != null) {
@@ -232,7 +252,7 @@ public class Metadata {
 					if (attrValues != null && !attrValues.isEmpty()) {
 						contentStr += ">";
 						for (String attrValue : attrValues) {
-							contentStr += "<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">" + attrValue + "</saml:AttributeValue>";
+							contentStr += "<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">" + Util.toXml(attrValue) + "</saml:AttributeValue>";
 						}
 						attributeConsumingServiceXML.append(contentStr + "</md:RequestedAttribute>");
 					} else {
@@ -256,9 +276,9 @@ public class Metadata {
 		StringBuilder contactsXml = new StringBuilder();
 
 		for (Contact contact : contacts) {
-			contactsXml.append("<md:ContactPerson contactType=\"" + contact.getContactType() + "\">");
-			contactsXml.append("<md:GivenName>" + contact.getGivenName() + "</md:GivenName>");
-			contactsXml.append("<md:EmailAddress>" + contact.getEmailAddress() + "</md:EmailAddress>");
+			contactsXml.append("<md:ContactPerson contactType=\"" + Util.toXml(contact.getContactType()) + "\">");
+			contactsXml.append("<md:GivenName>" + Util.toXml(contact.getGivenName()) + "</md:GivenName>");
+			contactsXml.append("<md:EmailAddress>" + Util.toXml(contact.getEmailAddress()) + "</md:EmailAddress>");
 			contactsXml.append("</md:ContactPerson>");
 		}
 
@@ -276,10 +296,10 @@ public class Metadata {
 
 		if (organization != null) {
 			String lang = organization.getOrgLangAttribute();
-			orgXml = "<md:Organization><md:OrganizationName xml:lang=\"" + lang + "\">" + organization.getOrgName()
-					+ "</md:OrganizationName><md:OrganizationDisplayName xml:lang=\"" + lang + "\">"
-					+ organization.getOrgDisplayName() + "</md:OrganizationDisplayName><md:OrganizationURL xml:lang=\""
-					+ lang + "\">" + organization.getOrgUrl() + "</md:OrganizationURL></md:Organization>";
+			orgXml = "<md:Organization><md:OrganizationName xml:lang=\"" + Util.toXml(lang) + "\">" + Util.toXml(organization.getOrgName())
+					+ "</md:OrganizationName><md:OrganizationDisplayName xml:lang=\"" + Util.toXml(lang) + "\">"
+					+ Util.toXml(organization.getOrgDisplayName()) + "</md:OrganizationDisplayName><md:OrganizationURL xml:lang=\""
+					+ Util.toXml(lang) + "\">" + Util.toXml(organization.getOrgUrl()) + "</md:OrganizationURL></md:Organization>";
 		}
 		return orgXml;
 	}
@@ -343,8 +363,8 @@ public class Metadata {
 		StringBuilder slsXml = new StringBuilder();
 
 		if (spSingleLogoutServiceUrl != null) {
-			slsXml.append("<md:SingleLogoutService Binding=\"" + spSingleLogoutServiceBinding + "\"");
-			slsXml.append(" Location=\"" + spSingleLogoutServiceUrl.toString() + "\"/>");
+			slsXml.append("<md:SingleLogoutService Binding=\"" + Util.toXml(spSingleLogoutServiceBinding) + "\"");
+			slsXml.append(" Location=\"" + Util.toXml(spSingleLogoutServiceUrl.toString()) + "\"/>");
 		}
 		return slsXml.toString();
 	}

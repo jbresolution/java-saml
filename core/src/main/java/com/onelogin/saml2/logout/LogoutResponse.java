@@ -299,12 +299,15 @@ public class LogoutResponse {
 	 * @throws XPathExpressionException
 	 */
     public String getIssuer() throws XPathExpressionException {
-    	String issuer = null;
-		NodeList issuers = this.query("/samlp:LogoutResponse/saml:Issuer");
-		if (issuers.getLength() == 1) {
-			issuer = issuers.item(0).getTextContent();
-		}
-        return issuer;
+	    String issuer = null;
+	    NodeList issuers = this.query("/samlp:LogoutResponse/saml:Issuer");
+	    if (issuers.getLength() == 1) {
+		    issuer = issuers.item(0).getTextContent();
+	    }
+	    if (issuer != null && settings.isTrimNameIds()) {
+		    issuer = issuer.trim();
+	    }
+	    return issuer;
     }
 
     /**
@@ -350,55 +353,86 @@ public class LogoutResponse {
 		return Util.query(this.logoutResponseDocument, query, null);
 	}
 
-    /**
-     * Generates a Logout Response XML string.
-     *
-     * @param inResponseTo
-     *				InResponseTo attribute value to bet set at the Logout Response. 
-	 * @param statusCode
-	 * 				String StatusCode to be set on the LogoutResponse
-     */
-	public void build(String inResponseTo, String statusCode) {
+      /**
+       * Generates a Logout Response XML string.
+       *
+       * @param inResponseTo
+       *				InResponseTo attribute value to bet set at the Logout Response. 
+	 * @param responseStatus
+	 * 				SamlResponseStatus response status to be set on the LogoutResponse
+       */
+	public void build(String inResponseTo, SamlResponseStatus responseStatus) {
 		id = Util.generateUniqueID(settings.getUniqueIDPrefix());
 		issueInstant = Calendar.getInstance();
 		this.inResponseTo = inResponseTo;
 
-		StrSubstitutor substitutor = generateSubstitutor(settings, statusCode);
-		this.logoutResponseString = substitutor.replace(getLogoutResponseTemplate());
+		StrSubstitutor substitutor = generateSubstitutor(settings, responseStatus);
+		this.logoutResponseString = postProcessXml(substitutor.replace(getLogoutResponseTemplate()), settings);
 	}
 
-    /**
-     * Generates a Logout Response XML string.
-     *
-     * @param inResponseTo
-     *				InResponseTo attribute value to bet set at the Logout Response. 
-     */
+      /**
+       * Generates a Logout Response XML string.
+       *
+       * @param inResponseTo
+       *				InResponseTo attribute value to bet set at the Logout Response. 
+	 * @param statusCode
+	 * 				String StatusCode to be set on the LogoutResponse
+       */
+	public void build(String inResponseTo, String statusCode) {
+		build(inResponseTo, new SamlResponseStatus(statusCode));
+	}
+
+      /**
+       * Generates a Logout Response XML string.
+       *
+       * @param inResponseTo
+       *				InResponseTo attribute value to bet set at the Logout Response. 
+       */
 	public void build(String inResponseTo) {
 		build(inResponseTo, Constants.STATUS_SUCCESS);
 	}
 	
-    /**
-     * Generates a Logout Response XML string.
-     *
-     */
+      /**
+       * Generates a Logout Response XML string.
+       */
 	public void build() {
 		build(null);
 	}	
 
 	/**
+	 * Allows for an extension class to post-process the LogoutResponse XML
+	 * generated for this response, in order to customize the result.
+	 * <p>
+	 * This method is invoked by {@link #build(String, String)} (and all of its
+	 * overloadings) and hence only in the logout response sending scenario. Its
+	 * default implementation simply returns the input XML as-is, with no change.
+	 * 
+	 * @param logoutResponseXml
+	 *              the XML produced for this LogoutResponse by the standard
+	 *              implementation provided by {@link LogoutResponse}
+	 * @param settings
+	 *              the settings
+	 * @return the post-processed XML for this LogoutResponse, which will then be
+	 *         returned by any call to {@link #getLogoutResponseXml()}
+	 */
+	protected String postProcessXml(final String logoutResponseXml, final Saml2Settings settings) {
+		return logoutResponseXml;
+	}
+	
+	/**
 	 * Substitutes LogoutResponse variables within a string by values.
 	 *
 	 * @param settings
 	 * 				Saml2Settings object. Setting data
-	 * @param statusCode
-	 * 				String StatusCode to be set on the LogoutResponse
+	 * @param responseStatus
+	 * 				SamlResponseStatus response status to be set on the LogoutResponse
 	 *
 	 * @return the StrSubstitutor object of the LogoutResponse
 	 */
-	private StrSubstitutor generateSubstitutor(Saml2Settings settings, String statusCode) {
+	private StrSubstitutor generateSubstitutor(Saml2Settings settings, SamlResponseStatus responseStatus) {
 		Map<String, String> valueMap = new HashMap<String, String>();
 
-		valueMap.put("id", id);
+		valueMap.put("id", Util.toXml(id));
 
 		String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
 		valueMap.put("issueInstant", issueInstantString);
@@ -406,37 +440,42 @@ public class LogoutResponse {
 		String destinationStr = "";
 		URL slo =  settings.getIdpSingleLogoutServiceResponseUrl();
 		if (slo != null) {
-			destinationStr = " Destination=\"" + slo.toString() + "\"";
+			destinationStr = " Destination=\"" + Util.toXml(slo.toString()) + "\"";
 		}
 		valueMap.put("destinationStr", destinationStr);
 
 		String inResponseStr = "";
 		if (inResponseTo != null) {
-			inResponseStr = " InResponseTo=\"" + inResponseTo + "\"";
+			inResponseStr = " InResponseTo=\"" + Util.toXml(inResponseTo) + "\"";
 		}
 		valueMap.put("inResponseStr", inResponseStr);		
 
-		String statusStr = "";
-		if (statusCode != null) {
-			statusStr = "Value=\"" + statusCode + "\"";
+		StringBuilder statusStr = new StringBuilder("<samlp:StatusCode ");
+		if (responseStatus != null) {
+			String statusCode = responseStatus.getStatusCode();
+			if (statusCode != null) {
+				statusStr.append("Value=\"").append(Util.toXml(statusCode)).append("\"");
+				String subStatusCode = responseStatus.getSubStatusCode();
+				if (subStatusCode != null) {
+					statusStr.append("><samlp:StatusCode Value=\"")
+						.append(Util.toXml(subStatusCode))
+						.append("\" /></samlp:StatusCode>");
+				} else {
+					statusStr.append(" />");
+				}
+				String statusMessage = responseStatus.getStatusMessage();
+				if (statusMessage != null) {
+					statusStr.append("<samlp:StatusMessage>")
+						.append(Util.toXml(statusMessage))
+						.append("</samlp:StatusMessage>");
+				}
+			}
 		}
-		valueMap.put("statusStr", statusStr);
+		valueMap.put("statusStr", statusStr.toString());
 
-		valueMap.put("issuer", settings.getSpEntityId());
+		valueMap.put("issuer", Util.toXml(settings.getSpEntityId()));
 
 		return new StrSubstitutor(valueMap);
-	}
-
-	/**
-	 * Substitutes LogoutResponse variables within a string by values.
-	 *
-	 * @param settings
-	 * 				Saml2Settings object. Setting data
-	 *
-	 * @return the StrSubstitutor object of the LogoutResponse
-	 */
-	private StrSubstitutor generateSubstitutor(Saml2Settings settings) {
-		return generateSubstitutor(settings, Constants.STATUS_SUCCESS);
 	}
 
 	/**
@@ -450,7 +489,7 @@ public class LogoutResponse {
 		template.append("IssueInstant=\"${issueInstant}\"${destinationStr}${inResponseStr} >");
 		template.append("<saml:Issuer>${issuer}</saml:Issuer>");
 		template.append("<samlp:Status>");
-		template.append("<samlp:StatusCode ${statusStr} />");
+		template.append("${statusStr}");
 		template.append("</samlp:Status>");
 		template.append("</samlp:LogoutResponse>");
 		return template;

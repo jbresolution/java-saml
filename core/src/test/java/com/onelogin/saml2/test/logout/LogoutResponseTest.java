@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -23,6 +24,7 @@ import com.onelogin.saml2.exception.Error;
 import com.onelogin.saml2.exception.XMLEntityException;
 import com.onelogin.saml2.http.HttpRequest;
 import com.onelogin.saml2.logout.LogoutResponse;
+import com.onelogin.saml2.model.SamlResponseStatus;
 import com.onelogin.saml2.settings.Saml2Settings;
 import com.onelogin.saml2.settings.SettingsBuilder;
 import com.onelogin.saml2.test.NaiveUrlEncoder;
@@ -161,12 +163,34 @@ public class LogoutResponseTest {
 		assertThat(logoutRequestStr, containsString("StatusCode Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\""));
 
 		LogoutResponse logoutResponse3 = new LogoutResponse(settings, httpRequest);
-		logoutResponse3.build("inResponseValue", Constants.STATUS_REQUEST_DENIED);
+		logoutResponse3.build("inResponseValue", Constants.STATUS_VERSION_MISMATCH);
 		logoutRequestStringBase64 = logoutResponse3.getEncodedLogoutResponse();
 		logoutRequestStr = Util.base64decodedInflated(logoutRequestStringBase64);
 		assertThat(logoutRequestStr, containsString("<samlp:LogoutResponse"));
 		assertThat(logoutRequestStr, containsString("InResponseTo=\"inResponseValue\""));
-		assertThat(logoutRequestStr, containsString("StatusCode Value=\"" + Constants.STATUS_REQUEST_DENIED + "\""));
+		assertThat(logoutRequestStr, containsString("<samlp:StatusCode Value=\"" + Constants.STATUS_VERSION_MISMATCH + "\" />"));
+		assertThat(logoutRequestStr, not(containsString("</samlp:StatusCode>")));
+		assertThat(logoutRequestStr, not(containsString("<samlp:StatusMessage>")));
+		
+		LogoutResponse logoutResponse4 = new LogoutResponse(settings, httpRequest);
+		SamlResponseStatus responseStatus = new SamlResponseStatus(Constants.STATUS_RESPONDER);
+		responseStatus.setSubStatusCode(Constants.STATUS_PARTIAL_LOGOUT);
+		logoutResponse4.build("inResponseValue", responseStatus);
+		logoutRequestStringBase64 = logoutResponse4.getEncodedLogoutResponse();
+		logoutRequestStr = Util.base64decodedInflated(logoutRequestStringBase64);
+		assertThat(logoutRequestStr, containsString("<samlp:LogoutResponse"));
+		assertThat(logoutRequestStr, containsString("InResponseTo=\"inResponseValue\""));
+		assertThat(logoutRequestStr, containsString("<samlp:StatusCode Value=\"" + Constants.STATUS_RESPONDER + "\"><samlp:StatusCode Value=\"" + Constants.STATUS_PARTIAL_LOGOUT + "\" /></samlp:StatusCode>"));
+		assertThat(logoutRequestStr, not(containsString("<samlp:StatusMessage>")));
+
+		responseStatus.setStatusMessage("status message");
+		logoutResponse4.build("inResponseValue", responseStatus);
+		logoutRequestStringBase64 = logoutResponse4.getEncodedLogoutResponse();
+		logoutRequestStr = Util.base64decodedInflated(logoutRequestStringBase64);
+		assertThat(logoutRequestStr, containsString("<samlp:LogoutResponse"));
+		assertThat(logoutRequestStr, containsString("InResponseTo=\"inResponseValue\""));
+		assertThat(logoutRequestStr, containsString("<samlp:StatusCode Value=\"" + Constants.STATUS_RESPONDER + "\"><samlp:StatusCode Value=\"" + Constants.STATUS_PARTIAL_LOGOUT + "\" /></samlp:StatusCode>"));
+		assertThat(logoutRequestStr, containsString("<samlp:StatusMessage>status message</samlp:StatusMessage>"));
 	}
 
 	/**
@@ -177,12 +201,39 @@ public class LogoutResponseTest {
 	 * @see com.onelogin.saml2.logout.LogoutResponse#getLogoutResponseXml
 	 */
 	@Test
-	public void testGetLogoutRequestXml() throws Exception {
+	public void testGetLogoutResponseXml() throws Exception {
 		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 		LogoutResponse logoutResponse = new LogoutResponse(settings, null);
 		logoutResponse.build();
 		String logoutResponseXML = logoutResponse.getLogoutResponseXml();
 		assertThat(logoutResponseXML, containsString("<samlp:LogoutResponse"));
+		assertThat(logoutResponseXML, containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SingleLogoutService.php\""));
+
+		String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response.xml.base64");
+		String requestURL = "/";
+		HttpRequest httpRequest = newHttpRequest(requestURL, samlResponseEncoded);
+		logoutResponse = new LogoutResponse(settings, httpRequest);
+		logoutResponseXML = logoutResponse.getLogoutResponseXml();
+		assertThat(logoutResponseXML, containsString("<samlp:LogoutResponse"));
+	}
+
+	/**
+	 * Tests the getLogoutResponseXml method of LogoutResponse
+	 * <p>
+	 * Case: logout destination contains special chars.
+	 *
+	 * @throws Exception
+	 *
+	 * @see com.onelogin.saml2.logout.LogoutResponse#getLogoutResponseXml
+	 */
+	@Test
+	public void testGetLogoutResponseXmlSpecialChars() throws Exception {
+		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+		LogoutResponse logoutResponse = new LogoutResponse(settings, null);
+		logoutResponse.build();
+		String logoutResponseXML = logoutResponse.getLogoutResponseXml();
+		assertThat(logoutResponseXML, containsString("<samlp:LogoutResponse"));
+		assertThat(logoutResponseXML, containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SingleLogoutService.php?a=1&amp;b=2\""));
 
 		String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response.xml.base64");
 		String requestURL = "/";
@@ -205,7 +256,7 @@ public class LogoutResponseTest {
 	 * @see com.onelogin.saml2.logout.LogoutResponse#getStatus
 	 */
 	@Test
-	public void testGestStatus() throws IOException, URISyntaxException, XMLEntityException, XPathExpressionException, Error {
+	public void testGetStatus() throws IOException, URISyntaxException, XMLEntityException, XPathExpressionException, Error {
 		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 		String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response_deflated.xml.base64");
 		final String requestURL = "/";
@@ -289,6 +340,32 @@ public class LogoutResponseTest {
 		assertNotNull(issueInstant);
 		long millis = issueInstant.getTimeInMillis();
 		assertTrue(millis >= start && millis <= end);
+	}
+	
+	/**
+	 * Tests the getIssuer method of LogoutResponse
+	 * <p>
+	 * Case: with or without trimming
+	 *
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws XMLEntityException
+	 * @throws XPathExpressionException
+	 * @throws Error
+	 *
+	 * @see com.onelogin.saml2.logout.LogoutResponse#getIssuer
+	 */
+	@Test
+	public void testGetIssuerTrimming() throws Error, IOException, XPathExpressionException  {
+		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+		String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response_with_whitespace.xml.base64");
+		HttpRequest httpRequest = newHttpRequest("/", samlResponseEncoded);
+		LogoutResponse logoutResponse = new LogoutResponse(settings, httpRequest);
+		assertEquals("\n    \thttp://idp.example.com/\n    ", logoutResponse.getIssuer());
+		
+		settings.setTrimNameIds(true);
+		logoutResponse = new LogoutResponse(settings, httpRequest);
+		assertEquals("http://idp.example.com/", logoutResponse.getIssuer());
 	}
 
 	/**
@@ -690,5 +767,27 @@ public class LogoutResponseTest {
 
 	private static HttpRequest newHttpRequest(String requestURL, String samlResponseEncoded) {
 		return new HttpRequest(requestURL, (String)null).addParameter("SAMLResponse", samlResponseEncoded);
+	}
+
+	/**
+	 * Tests the postProcessXml method of LogoutResponse
+	 *
+	 * @throws Exception
+	 * 
+	 * @see com.onelogin.saml2.logout.LogoutResponse#postProcessXml
+	 */
+	@Test
+	public void testPostProcessXml() throws Exception {
+		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+		LogoutResponse logoutResponse = new LogoutResponse(settings, null) {
+			@Override
+			protected String postProcessXml(String logoutResponseXml, Saml2Settings sett) {
+				assertEquals(logoutResponseXml, super.postProcessXml(logoutResponseXml, sett));
+				assertSame(settings, sett);
+				return "changed";
+			}
+		};
+		logoutResponse.build();
+		assertEquals("changed", logoutResponse.getLogoutResponseXml());
 	}
 }

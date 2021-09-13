@@ -11,8 +11,8 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.onelogin.saml2.settings.Saml2Settings;
 import com.onelogin.saml2.model.Organization;
+import com.onelogin.saml2.settings.Saml2Settings;
 import com.onelogin.saml2.util.Constants;
 import com.onelogin.saml2.util.Util;
 
@@ -43,26 +43,6 @@ public class AuthnRequest {
 	private final Saml2Settings settings;
 
 	/**
-	 * When true the AuthNRequest will set the ForceAuthn='true'
-	 */
-	private final boolean forceAuthn;
-
-	/**
-	 * When true the AuthNRequest will set the IsPassive='true'
-	 */
-	private final boolean isPassive;
-
-	/**
-	 * When true the AuthNReuqest will set a nameIdPolicy
-	 */
-	private final boolean setNameIdPolicy;
-
-	/**
-	 * Indicates to the IdP the subject that should be authenticated
-	 */
-	private final String nameIdValueReq;
-	
-	/**
 	 * Time stamp that indicates when the AuthNRequest was created
 	 */
 	private final Calendar issueInstant;
@@ -72,53 +52,93 @@ public class AuthnRequest {
 	 *
 	 * @param settings
 	 *            OneLogin_Saml2_Settings
+	 * @see #AuthnRequest(Saml2Settings, AuthnRequestParams)
 	 */
 	public AuthnRequest(Saml2Settings settings) {
-		this(settings, false, false, true);
+		this(settings, new AuthnRequestParams(false, false, true));
 	}
 
 	/**
 	 * Constructs the AuthnRequest object.
 	 *
 	 * @param settings
-	 *            OneLogin_Saml2_Settings
+	 *              OneLogin_Saml2_Settings
 	 * @param forceAuthn
-	 *            When true the AuthNReuqest will set the ForceAuthn='true'
+	 *              When true the AuthNReuqest will set the ForceAuthn='true'
 	 * @param isPassive
-	 *            When true the AuthNReuqest will set the IsPassive='true'
+	 *              When true the AuthNReuqest will set the IsPassive='true'
 	 * @param setNameIdPolicy
-	 *            When true the AuthNReuqest will set a nameIdPolicy
+	 *              When true the AuthNReuqest will set a nameIdPolicy
 	 * @param nameIdValueReq
-	 *            Indicates to the IdP the subject that should be authenticated
+	 *              Indicates to the IdP the subject that should be authenticated
+	 * @deprecated use {@link #AuthnRequest(Saml2Settings, AuthnRequestParams)} with
+	 *             {@link AuthnRequestParams#AuthnRequestParams(boolean, boolean, boolean, String)}
+	 *             instead
 	 */
+	@Deprecated
 	public AuthnRequest(Saml2Settings settings, boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, String nameIdValueReq) {
+		this(settings, new AuthnRequestParams(forceAuthn, isPassive, setNameIdPolicy, nameIdValueReq));
+	}
+	
+	/**
+	 * Constructs the AuthnRequest object.
+	 *
+	 * @param settings
+	 *              OneLogin_Saml2_Settings
+	 * @param forceAuthn
+	 *              When true the AuthNReuqest will set the ForceAuthn='true'
+	 * @param isPassive
+	 *              When true the AuthNReuqest will set the IsPassive='true'
+	 * @param setNameIdPolicy
+	 *              When true the AuthNReuqest will set a nameIdPolicy
+	 * @deprecated use {@link #AuthnRequest(Saml2Settings, AuthnRequestParams)} with
+	 *             {@link AuthnRequestParams#AuthnRequestParams(boolean, boolean, boolean)}
+	 *             instead
+	 */
+	@Deprecated
+	public AuthnRequest(Saml2Settings settings, boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy) {
+		this(settings, forceAuthn, isPassive, setNameIdPolicy, null);
+	}
+
+	/**
+	 * Constructs the AuthnRequest object.
+	 *
+	 * @param settings
+	 *              OneLogin_Saml2_Settings
+	 * @param params
+	 *              a set of authentication request input parameters that shape the
+	 *              request to create
+	 */
+	public AuthnRequest(Saml2Settings settings, AuthnRequestParams params) {
 		this.id = Util.generateUniqueID(settings.getUniqueIDPrefix());
 		issueInstant = Calendar.getInstance();
-		this.isPassive = isPassive;
 		this.settings = settings;
-		this.forceAuthn = forceAuthn;
-		this.setNameIdPolicy = setNameIdPolicy;
-		this.nameIdValueReq = nameIdValueReq;
 
-		StrSubstitutor substitutor = generateSubstitutor(settings);
-		authnRequestString = substitutor.replace(getAuthnRequestTemplate());
+		StrSubstitutor substitutor = generateSubstitutor(params, settings);
+		authnRequestString = postProcessXml(substitutor.replace(getAuthnRequestTemplate()), params, settings);
 		LOGGER.debug("AuthNRequest --> " + authnRequestString);
 	}
 
 	/**
-	 * Constructs the AuthnRequest object.
-	 *
+	 * Allows for an extension class to post-process the AuthnRequest XML generated
+	 * for this request, in order to customize the result.
+	 * <p>
+	 * This method is invoked at construction time, after all the other fields of
+	 * this class have already been initialised. Its default implementation simply
+	 * returns the input XML as-is, with no change.
+	 * 
+	 * @param authnRequestXml
+	 *              the XML produced for this AuthnRequest by the standard
+	 *              implementation provided by {@link AuthnRequest}
+	 * @param params
+	 *              the authentication request input parameters
 	 * @param settings
-	 *            OneLogin_Saml2_Settings
-	 * @param forceAuthn
-	 *            When true the AuthNReuqest will set the ForceAuthn='true'
-	 * @param isPassive
-	 *            When true the AuthNReuqest will set the IsPassive='true'
-	 * @param setNameIdPolicy
-	 *            When true the AuthNReuqest will set a nameIdPolicy
+	 *              the settings
+	 * @return the post-processed XML for this AuthnRequest, which will then be
+	 *         returned by any call to {@link #getAuthnRequestXml()}
 	 */
-	public AuthnRequest(Saml2Settings settings, boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy) {
-		this(settings, forceAuthn, isPassive, setNameIdPolicy, null);
+	protected String postProcessXml(final String authnRequestXml, final AuthnRequestParams params, final Saml2Settings settings) {
+		return authnRequestXml;
 	}
 
 	/**
@@ -161,22 +181,24 @@ public class AuthnRequest {
 	/**
 	 * Substitutes AuthnRequest variables within a string by values.
 	 *
+	 * @param params
+	 *              the authentication request input parameters
 	 * @param settings
 	 * 				Saml2Settings object. Setting data
 	 * 
 	 * @return the StrSubstitutor object of the AuthnRequest 
 	 */ 
-	private StrSubstitutor generateSubstitutor(Saml2Settings settings) {
+	private StrSubstitutor generateSubstitutor(AuthnRequestParams params, Saml2Settings settings) {
 
 		Map<String, String> valueMap = new HashMap<String, String>();
 
 		String forceAuthnStr = "";
-		if (forceAuthn) {
+		if (params.isForceAuthn()) {
 			forceAuthnStr = " ForceAuthn=\"true\"";
 		}
 
 		String isPassiveStr = "";
-		if (isPassive) {
+		if (params.isPassive()) {
 			isPassiveStr = " IsPassive=\"true\"";
 		}
 
@@ -186,27 +208,32 @@ public class AuthnRequest {
 		String destinationStr = "";
 		URL sso =  settings.getIdpSingleSignOnServiceUrl();
 		if (sso != null) {
-			destinationStr = " Destination=\"" + sso.toString() + "\"";
+			destinationStr = " Destination=\"" + Util.toXml(sso.toString()) + "\"";
 		}
 		valueMap.put("destinationStr", destinationStr);
 
 		String subjectStr = "";
+		String nameIdValueReq = params.getNameIdValueReq();
 		if (nameIdValueReq != null && !nameIdValueReq.isEmpty()) {
 			String nameIDFormat = settings.getSpNameIDFormat();
 			subjectStr = "<saml:Subject>";
-			subjectStr += "<saml:NameID Format=\"" + nameIDFormat + "\">" + nameIdValueReq + "</saml:NameID>";
+			subjectStr += "<saml:NameID Format=\"" + Util.toXml(nameIDFormat) + "\">" + Util.toXml(nameIdValueReq) + "</saml:NameID>";
 			subjectStr += "<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"></saml:SubjectConfirmation>";
 			subjectStr += "</saml:Subject>";
         }
         valueMap.put("subjectStr", subjectStr);
 
 		String nameIDPolicyStr = "";
-		if (setNameIdPolicy) {
+		if (params.isSetNameIdPolicy()) {
 			String nameIDPolicyFormat = settings.getSpNameIDFormat();
 			if (settings.getWantNameIdEncrypted()) {
 				nameIDPolicyFormat = Constants.NAMEID_ENCRYPTED;
 			}
-			nameIDPolicyStr = "<samlp:NameIDPolicy Format=\"" + nameIDPolicyFormat + "\" AllowCreate=\"true\" />";
+			String allowCreateStr = "";
+			if (params.isAllowCreate()) {
+				allowCreateStr = " AllowCreate=\"true\"";
+			}
+			nameIDPolicyStr = "<samlp:NameIDPolicy Format=\"" + Util.toXml(nameIDPolicyFormat) + "\"" + allowCreateStr + " />";
 		}
 		valueMap.put("nameIDPolicyStr", nameIDPolicyStr);
 
@@ -215,26 +242,26 @@ public class AuthnRequest {
 		if (organization != null) {
 			String displayName = organization.getOrgDisplayName();
 			if (!displayName.isEmpty()) {
-				providerStr = " ProviderName=\""+ displayName + "\""; 
+				providerStr = " ProviderName=\""+ Util.toXml(displayName) + "\""; 
 			}
 		}
 		valueMap.put("providerStr", providerStr);
 
 		String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
 		valueMap.put("issueInstant", issueInstantString);
-		valueMap.put("id", String.valueOf(id));
-		valueMap.put("assertionConsumerServiceURL", String.valueOf(settings.getSpAssertionConsumerServiceUrl()));
-		valueMap.put("protocolBinding", settings.getSpAssertionConsumerServiceBinding());
-		valueMap.put("spEntityid", settings.getSpEntityId());
+		valueMap.put("id", Util.toXml(String.valueOf(id)));
+		valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(settings.getSpAssertionConsumerServiceUrl())));
+		valueMap.put("protocolBinding", Util.toXml(settings.getSpAssertionConsumerServiceBinding()));
+		valueMap.put("spEntityid", Util.toXml(settings.getSpEntityId()));
 
 		String requestedAuthnContextStr = "";
 		List<String> requestedAuthnContexts = settings.getRequestedAuthnContext();
 		List<String> requestedAuthnContextDeclRefs = settings.getRequestedAuthnContextDeclRef();
 		if ((requestedAuthnContexts != null && !requestedAuthnContexts.isEmpty()) || (requestedAuthnContextDeclRefs != null && !requestedAuthnContextDeclRefs.isEmpty())) {
 			String requestedAuthnContextCmp = settings.getRequestedAuthnContextComparison();
-			requestedAuthnContextStr = "<samlp:RequestedAuthnContext Comparison=\"" + requestedAuthnContextCmp + "\">";
+			requestedAuthnContextStr = "<samlp:RequestedAuthnContext Comparison=\"" + Util.toXml(requestedAuthnContextCmp) + "\">";
 			for (String requestedAuthnContext : requestedAuthnContexts) {
-				requestedAuthnContextStr += "<saml:AuthnContextClassRef>" + requestedAuthnContext + "</saml:AuthnContextClassRef>";
+				requestedAuthnContextStr += "<saml:AuthnContextClassRef>" + Util.toXml(requestedAuthnContext) + "</saml:AuthnContextClassRef>";
 			}
 			for (String requestedAuthnContextDeclRef : requestedAuthnContextDeclRefs) {
 				requestedAuthnContextStr += "<saml:AuthnContextDeclRef>" + requestedAuthnContextDeclRef + "</saml:AuthnContextDeclRef>";
