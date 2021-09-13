@@ -206,7 +206,10 @@ public class AuthnRequest {
 		valueMap.put("isPassiveStr", isPassiveStr);
 
 		String destinationStr = "";
-		URL sso =  settings.getIdpSingleSignOnServiceUrl();
+		URL sso = params.getSpConsumerUrl();
+		if(sso == null) {
+			sso = settings.getIdpSingleSignOnServiceUrl();
+		}
 		if (sso != null) {
 			destinationStr = " Destination=\"" + Util.toXml(sso.toString()) + "\"";
 		}
@@ -250,7 +253,12 @@ public class AuthnRequest {
 		String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
 		valueMap.put("issueInstant", issueInstantString);
 		valueMap.put("id", Util.toXml(String.valueOf(id)));
-		valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(settings.getSpAssertionConsumerServiceUrl())));
+
+		URL assertionConsumerServiceURL = params.getSpConsumerUrl();
+		if(assertionConsumerServiceURL == null) {
+			assertionConsumerServiceURL = settings.getSpAssertionConsumerServiceUrl();
+		}
+		valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(assertionConsumerServiceURL)));
 
 		String protocolBindingString = " ";
 		if(params.isIncludeProtocolBinding()) {

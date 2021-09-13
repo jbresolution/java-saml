@@ -1,5 +1,7 @@
 package com.onelogin.saml2.authn;
 
+import java.net.URL;
+
 /**
  * Input parameters for a SAML 2 authentication request.
  */
@@ -32,7 +34,16 @@ public class AuthnRequestParams {
 	 */
 	private final String protocolBinding;
 
+	/**
+	 * Indicates to include the ProtocolBindung-attribute
+	 */
 	private final boolean includeProtocolBinding;
+
+	/**
+	 * SPConsumerURL to include to the request. If it is null, the value from setting is to be used
+	 */
+	private final URL spConsumerUrl;
+
 
 	/**
 	 * Create a set of authentication request input parameters.
@@ -68,7 +79,7 @@ public class AuthnRequestParams {
 	 *              <code>true</code>
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate) {
-		this(forceAuthn, isPassive, setNameIdPolicy, allowCreate, null,null,true);
+		this(forceAuthn, isPassive, setNameIdPolicy, allowCreate, null,null,true,null);
 	}
 
 	/**
@@ -86,7 +97,7 @@ public class AuthnRequestParams {
 	 *              the subject that should be authenticated
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, String nameIdValueReq) {
-		this(forceAuthn, isPassive, setNameIdPolicy, true, nameIdValueReq,null,true);
+		this(forceAuthn, isPassive, setNameIdPolicy, true, nameIdValueReq,null,true,null);
 	}
 
 	/**
@@ -112,7 +123,7 @@ public class AuthnRequestParams {
 	 *
 	 */
 	public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate,
-	            String nameIdValueReq, String protocolBinding, boolean includeProtocolBinding) {
+	            String nameIdValueReq, String protocolBinding, boolean includeProtocolBinding, URL spConsumerUrl) {
 		this.forceAuthn = forceAuthn;
 		this.isPassive = isPassive;
 		this.setNameIdPolicy = setNameIdPolicy;
@@ -120,6 +131,7 @@ public class AuthnRequestParams {
 		this.nameIdValueReq = nameIdValueReq;
 		this.protocolBinding = protocolBinding;
 		this.includeProtocolBinding = includeProtocolBinding;
+		this.spConsumerUrl = spConsumerUrl;
 	}
 
 	/**
@@ -137,6 +149,7 @@ public class AuthnRequestParams {
 		this.nameIdValueReq = source.getNameIdValueReq();
 		this.protocolBinding = source.getProtocolBinding();
 		this.includeProtocolBinding = source.isIncludeProtocolBinding();
+		this.spConsumerUrl = source.getSpConsumerUrl();
 	}
 
 	/**
@@ -187,5 +200,9 @@ public class AuthnRequestParams {
 
 	public boolean isIncludeProtocolBinding() {
 		return includeProtocolBinding;
+	}
+
+	public URL getSpConsumerUrl() {
+		return spConsumerUrl;
 	}
 }
