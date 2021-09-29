@@ -3,7 +3,7 @@
 
 	<groupId>de.resolution</groupId>
 	<artifactId>java-saml-toolkit</artifactId>
-	<version>2.7.1-RESOLUTION-SNAPSHOT</version>
+	<version>2.8.1-RESOLUTION-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Resoltion's fork of OneLogin java-saml Toolkit Project</name>
@@ -13,10 +13,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
                 <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
-		<slf4jVersion>1.7.30</slf4jVersion>
-		<junitVersion>4.13.1</junitVersion>
-		<logbackVersion>1.2.3</logbackVersion>
-		<apacheCommonsLangVersion>3.11</apacheCommonsLangVersion>
+		<slf4jVersion>1.7.32</slf4jVersion>
+		<junitVersion>4.13.2</junitVersion>
+		<logbackVersion>1.2.6</logbackVersion>
+		<apacheCommonsLangVersion>3.12.0</apacheCommonsLangVersion>
 	</properties>
 
 	<modules>
@@ -72,7 +72,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>1.4.1</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>enforce-versions</id>
@@ -97,7 +97,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>6.1.6</version>
+				<version>6.3.1</version>
 				<configuration>
 					<!-- Added this to make build work whie fetching from https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2005.meta fails -->
 					<failOnError>false</failOnError>
@@ -210,7 +210,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.2.0</version>
+						<version>3.3.1</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -226,7 +226,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
