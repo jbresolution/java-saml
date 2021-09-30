@@ -101,7 +101,10 @@ public class SamlResponse {
 	 *              URL of the current host + current view
 	 *
 	 * @param samlResponse
-	 *              A string containting the base64 encoded response from the IdP
+	 *              A string containing the response from the IdP
+	 *
+	 * @param isBase64
+	 * 				True if samlResponse is base64-encoded, false if it's XML
 	 *
 	 *
 	 * @throws ValidationError
@@ -112,10 +115,37 @@ public class SamlResponse {
 	 * @throws XPathExpressionException
      *
 	 */
-	public SamlResponse(Saml2Settings settings, String currentUrl, String samlResponse) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, SettingsException, ValidationError {
+	public SamlResponse(Saml2Settings settings, String currentUrl, String samlResponse, boolean isBase64) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, SettingsException, ValidationError {
 		this.settings = settings;
 		this.currentUrl = currentUrl;
-		loadXmlFromBase64(samlResponse);
+		if(isBase64) {
+			loadXmlFromBase64(samlResponse);
+		} else {
+			loadXml(samlResponse);
+		}
+	}
+
+	/**
+	 * Constructor to have a Response object fully built and ready to validate the saml response.
+	 *
+	 * @param settings
+	 *              Saml2Settings object. Setting data
+	 * @param currentUrl
+	 *              URL of the current host + current view
+	 *
+	 * @param samlResponse
+	 *              A string containing the base64-encoded response from the IdP
+	 *
+	 * @throws ValidationError
+	 * @throws SettingsException
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws XPathExpressionException
+	 *
+	 */
+	public SamlResponse(Saml2Settings settings, String currentUrl, String samlResponse) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, SettingsException, ValidationError {
+		this(settings,currentUrl,samlResponse,true);
 	}
 
 	/**
@@ -153,6 +183,10 @@ public class SamlResponse {
 	 * @throws ValidationError
 	 */
 	public void loadXmlFromBase64(String responseStr) throws ParserConfigurationException, XPathExpressionException, SAXException, IOException, SettingsException, ValidationError {
+		String xmlStr = new String(Util.base64decoder(responseStr), "UTF-8");
+		loadXml(xmlStr);
+
+		/*
 		samlResponseString = new String(Util.base64decoder(responseStr), "UTF-8");
 		samlResponseDocument = Util.loadXML(samlResponseString);
 
@@ -167,16 +201,51 @@ public class SamlResponse {
 			encrypted = true;
 			decryptedDocument = this.decryptAssertion(decryptedDocument);
 		}
+
+		 */
+	}
+
+	public void loadXml(String xmlStr) throws ParserConfigurationException, XPathExpressionException, SAXException, IOException, SettingsException, ValidationError {
+		samlResponseString = xmlStr;
+		samlResponseDocument = Util.loadXML(samlResponseString);
+
+		if (samlResponseDocument == null) {
+			throw new ValidationError("SAML Response could not be processed", ValidationError.INVALID_XML_FORMAT);
+		}
+
+		NodeList encryptedAssertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML,"EncryptedAssertion");
+
+		if (encryptedAssertionNodes.getLength() != 0) {
+			decryptedDocument = Util.copyDocument(samlResponseDocument);
+			encrypted = true;
+			decryptedDocument = this.decryptAssertion(decryptedDocument);
+		}
+
+
+
+
 	}
 
 	/**
 	 * Determines if the SAML Response is valid using the certificate.
 	 *
 	 * @param requestId The ID of the AuthNRequest sent by this SP to the IdP
+	 * @return if the response is valid or not
+	 */
+	public boolean isValid(String requestId ) {
+		return isValid(requestId,true);
+	}
+
+
+	/**
+	 * Determines if the SAML Response is valid
+	 *
+	 * @param requestId The ID of the AuthNRequest sent by this SP to the IdP
+	 * @param validateXmlSignature check the Response's XML-Signature.
 	 *
 	 * @return if the response is valid or not
 	 */
-	public boolean isValid(String requestId) {
+	public boolean isValid(String requestId, boolean validateXmlSignature) {
 		validationException = null;
 
 		try {
@@ -307,16 +376,18 @@ public class SamlResponse {
 
 				validateSubjectConfirmation(responseInResponseTo);
 
-				if (settings.getWantAssertionsSigned() && !hasSignedAssertion) {
-					throw new ValidationError("The Assertion of the Response is not signed and the SP requires it", ValidationError.NO_SIGNED_ASSERTION);
-				}
+				if(validateXmlSignature) {
+					if (settings.getWantAssertionsSigned() && !hasSignedAssertion) {
+						throw new ValidationError("The Assertion of the Response is not signed and the SP requires it", ValidationError.NO_SIGNED_ASSERTION);
+					}
 
-				if (settings.getWantMessagesSigned() && !hasSignedResponse) {
-					throw new ValidationError("The Message of the Response is not signed and the SP requires it", ValidationError.NO_SIGNED_MESSAGE);
+					if (settings.getWantMessagesSigned() && !hasSignedResponse) {
+						throw new ValidationError("The Message of the Response is not signed and the SP requires it", ValidationError.NO_SIGNED_MESSAGE);
+					}
 				}
 			}
 
-			if (signedElements.isEmpty() || (!hasSignedAssertion && !hasSignedResponse)) {
+			if ( validateXmlSignature && (signedElements.isEmpty() || (!hasSignedAssertion && !hasSignedResponse))) {
 				throw new ValidationError("No Signature found. SAML Response rejected", ValidationError.NO_SIGNATURE_FOUND);
 			} else {
 				X509Certificate cert = settings.getIdpx509cert();
