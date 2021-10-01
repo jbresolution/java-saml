@@ -71,6 +71,8 @@ public class Saml2Settings {
 	private boolean signMetadata = false;
 	private List<String> requestedAuthnContext = new ArrayList<>();
 	private List<String> requestedAuthnContextDeclRef = new ArrayList<>();
+	private int allowedClockDrift = Constants.ALOWED_CLOCK_DRIFT;
+	private boolean validateTimestamps = true;
 
 	private String requestedAuthnContextComparison = "exact";
 	private boolean wantXMLValidation = true;
@@ -920,7 +922,37 @@ public class Saml2Settings {
 	public boolean isTrimAttributeValues() {
 		return trimAttributeValues;
 	}
-	
+
+	/**
+	 * Gets the allowed clock drift applied when checking message validity
+	 * @return allowed clock drift in seconds
+	 */
+	public int getAllowedClockDrift() {
+		return allowedClockDrift;
+	}
+
+	/**
+	 * Sets the allowed clock drift applied when checking message validity
+	 * @param clockDrift allowed clock drift in seconds
+	 */
+	public void setAllowedClockDrift(int clockDrift) {
+		allowedClockDrift = clockDrift;
+	}
+
+	/**
+	 * @return true if timestamps should be validated
+	 */
+	public boolean isValidateTimestamps() {
+		return validateTimestamps;
+	}
+
+	/**
+	 * @param validateTimestamps set this to true to validate timestamps
+	 */
+	public void setValidateTimestamps(boolean validateTimestamps) {
+		this.validateTimestamps = validateTimestamps;
+	}
+
 	/**
 	 * Set contacts info that will be listed on the Service Provider metadata
 	 * 
