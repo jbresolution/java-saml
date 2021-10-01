@@ -466,26 +466,27 @@ public class SamlResponse {
 						continue;
 					}
 
-					Node notOnOrAfter = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotOnOrAfter");
-					if (notOnOrAfter == null) {
-						validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData doesn't contain a NotOnOrAfter attribute"));
-						continue;
-					}
-
-					Instant noa = Util.parseDateTime(notOnOrAfter.getNodeValue());
-					noa = ChronoUnit.SECONDS.addTo(noa, Constants.ALOWED_CLOCK_DRIFT);
-					if (Util.isEqualNow(noa) || Util.isBeforeNow(noa)) {
-						validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is no longer valid"));
-						continue;
-					}
-
-					Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
-					if (notBefore != null) {
-						Instant nb = Util.parseDateTime(notBefore.getNodeValue());
-						nb = ChronoUnit.SECONDS.addTo(nb, Constants.ALOWED_CLOCK_DRIFT * -1);
-						if (Util.isAfterNow(nb)) {
-							validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is not yet valid"));
+					if(settings.isValidateTimestamps()) {
+						Node notOnOrAfter = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotOnOrAfter");
+						if (notOnOrAfter == null) {
+							validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData doesn't contain a NotOnOrAfter attribute"));
 							continue;
+						}
+						Instant noa = Util.parseDateTime(notOnOrAfter.getNodeValue());
+						noa = ChronoUnit.SECONDS.addTo(noa, settings.getAllowedClockDrift());
+						if (Util.isEqualNow(noa) || Util.isBeforeNow(noa)) {
+							validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is no longer valid"));
+							continue;
+						}
+
+						Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
+						if (notBefore != null) {
+							Instant nb = Util.parseDateTime(notBefore.getNodeValue());
+							nb = ChronoUnit.SECONDS.addTo(nb, settings.getAllowedClockDrift() * -1L);
+							if (Util.isAfterNow(nb)) {
+								validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is not yet valid"));
+								continue;
+							}
 						}
 					}
 					validSubjectConfirmation = true;
@@ -1116,6 +1117,9 @@ public class SamlResponse {
 	 * @throws ValidationError
 	 */
 	public boolean validateTimestamps() throws ValidationError {
+		if(!settings.isValidateTimestamps()) {
+			return true;
+		}
 		NodeList timestampNodes = samlResponseDocument.getElementsByTagNameNS("*", "Conditions");
 		if (timestampNodes.getLength() != 0) {
 			for (int i = 0; i < timestampNodes.getLength(); i++) {
@@ -1125,7 +1129,7 @@ public class SamlResponse {
 				// validate NotOnOrAfter
 				if (naAttribute != null) {
 					Instant notOnOrAfterDate = Util.parseDateTime(naAttribute.getNodeValue());
-					notOnOrAfterDate = ChronoUnit.SECONDS.addTo(notOnOrAfterDate, Constants.ALOWED_CLOCK_DRIFT);
+					notOnOrAfterDate = ChronoUnit.SECONDS.addTo(notOnOrAfterDate, settings.getAllowedClockDrift());
 					if (Util.isEqualNow(notOnOrAfterDate) || Util.isBeforeNow(notOnOrAfterDate)) {
 						throw new ValidationError("Could not validate timestamp: expired. Check system clock.", ValidationError.ASSERTION_EXPIRED);
 					}
@@ -1133,7 +1137,7 @@ public class SamlResponse {
 				// validate NotBefore
 				if (nbAttribute != null) {
 					Instant notBeforeDate = Util.parseDateTime(nbAttribute.getNodeValue());
-					notBeforeDate = ChronoUnit.SECONDS.addTo(notBeforeDate, Constants.ALOWED_CLOCK_DRIFT * -1);
+					notBeforeDate = ChronoUnit.SECONDS.addTo(notBeforeDate, settings.getAllowedClockDrift() * -1L);
 					if (Util.isAfterNow(notBeforeDate)) {
 						throw new ValidationError("Could not validate timestamp: not yet valid. Check system clock.", ValidationError.ASSERTION_TOO_EARLY);
 					}

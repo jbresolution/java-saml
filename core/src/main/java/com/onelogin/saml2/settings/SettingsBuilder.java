@@ -120,6 +120,8 @@ public class SettingsBuilder {
 	public final static String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO = "onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto";
 	public final static String SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY = "onelogin.saml2.security.allow_duplicated_attribute_name";
 	public final static String SECURITY_REJECT_DEPRECATED_ALGORITHM = "onelogin.saml2.security.reject_deprecated_alg";
+	public final static String SECURITY_ALLOWED_CLOCK_DRIFT = "onelogin.saml2.security.allowed_clock_drift";
+	public final static String SECURITY_VALIDATE_TIMESTAMPS = "onelogin.saml2.security.validate_timestamps";
 
 	// Compress
 	public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
@@ -438,6 +440,16 @@ public class SettingsBuilder {
 		Boolean rejectDeprecatedAlg = loadBooleanProperty(SECURITY_REJECT_DEPRECATED_ALGORITHM);
 		if (rejectDeprecatedAlg != null) {
 			saml2Setting.setRejectDeprecatedAlg(rejectDeprecatedAlg);
+		}
+
+		Integer allowedClockDrift = loadIntegerProperty(SECURITY_ALLOWED_CLOCK_DRIFT);
+		if(allowedClockDrift != null) {
+			saml2Setting.setAllowedClockDrift(allowedClockDrift);
+		}
+
+		Boolean validateTimestamps = loadBooleanProperty(SECURITY_VALIDATE_TIMESTAMPS);
+		if(validateTimestamps != null) {
+			saml2Setting.setValidateTimestamps(validateTimestamps);
 		}
 	}
 
@@ -814,6 +826,25 @@ public class SettingsBuilder {
 			return (Boolean) propValue;
 		}
 		return null;
+	}
+
+	private Integer loadIntegerProperty(String propertyKey) {
+		Object propValue = samlData.get(propertyKey);
+
+		if(propValue instanceof Integer) {
+			return (Integer) propValue;
+		}
+
+		if(isString(propValue)) {
+			try {
+				return Integer.parseInt((String) propValue);
+			} catch (NumberFormatException e) {
+				LOGGER.error("{} is no parseable Integer",propValue);
+			}
+		}
+
+		return null;
+
 	}
 
 	/**
