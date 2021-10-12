@@ -368,7 +368,7 @@ public class SamlResponse {
 				// Check the session Expiration
 				DateTime sessionExpiration = this.getSessionNotOnOrAfter();
 				if (sessionExpiration != null) {
-					sessionExpiration = sessionExpiration.plus(Constants.ALOWED_CLOCK_DRIFT * 1000);
+					sessionExpiration = sessionExpiration.plus(settings.getAllowedClockDrift() * 1000L);
 					if (sessionExpiration.isEqualNow() || sessionExpiration.isBeforeNow()) {
 						throw new ValidationError("The attributes have expired, based on the SessionNotOnOrAfter of the AttributeStatement of this Response", ValidationError.SESSION_EXPIRED);
 					}
@@ -474,8 +474,9 @@ public class SamlResponse {
 						}
 
 						DateTime noa = Util.parseDateTime(notOnOrAfter.getNodeValue());
-						noa = noa.plus(Constants.ALOWED_CLOCK_DRIFT * 1000);
-						if (noa.isEqualNow() || noa.isBeforeNow()) {
+
+						DateTime noaPlusDrift = noa.plus(settings.getAllowedClockDrift() * 1000L);
+						if (noaPlusDrift.isEqualNow() || noaPlusDrift.isBeforeNow()) {
 							validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is no longer valid"));
 							continue;
 						}
@@ -483,8 +484,8 @@ public class SamlResponse {
 						Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
 						if (notBefore != null) {
 							DateTime nb = Util.parseDateTime(notBefore.getNodeValue());
-							nb = nb.minus(Constants.ALOWED_CLOCK_DRIFT * 1000);
-							if (nb.isAfterNow()) {
+							DateTime nbMinusDrift = nb.minus(settings.getAllowedClockDrift() * 1000L);
+							if (nbMinusDrift.isAfterNow()) {
 								validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is not yet valid"));
 								continue;
 							}
