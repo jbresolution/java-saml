@@ -73,6 +73,8 @@ public class Saml2Settings {
 	private List<String> requestedAuthnContextDeclRef = new ArrayList<>();
 	private int allowedClockDrift = Constants.ALOWED_CLOCK_DRIFT;
 	private boolean validateTimestamps = true;
+	private boolean validateDestination = true;
+	private boolean validateRecipient = true;
 
 	private String requestedAuthnContextComparison = "exact";
 	private boolean wantXMLValidation = true;
@@ -951,6 +953,22 @@ public class Saml2Settings {
 	 */
 	public void setValidateTimestamps(boolean validateTimestamps) {
 		this.validateTimestamps = validateTimestamps;
+	}
+
+	public void setValidateDestination(boolean validateDestination) {
+		this.validateDestination = validateDestination;
+	}
+
+	public boolean isValidateDestination() {
+		return this.validateDestination;
+	}
+
+	public boolean isValidateRecipient() {
+		return validateRecipient;
+	}
+
+	public void setValidateRecipient(boolean validateRecipient) {
+		this.validateRecipient = validateRecipient;
 	}
 
 	/**
