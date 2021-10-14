@@ -350,7 +350,9 @@ public class SamlResponse {
 				}
 
 				// Check destination
-				validateDestination(rootElement);
+				if(settings.isValidateDestination()) {
+					validateDestination(rootElement);
+				}
 
 				// Check Audiences
 				validateAudiences();
@@ -452,11 +454,13 @@ public class SamlResponse {
 			for (int c = 0; c < subjectConfirmationDataNodes.getLength(); c++) {
 				if (subjectConfirmationDataNodes.item(c).getLocalName() != null && subjectConfirmationDataNodes.item(c).getLocalName().equals("SubjectConfirmationData")) {
 
-					Node recipient = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("Recipient");
-					final SubjectConfirmationIssue issue = validateRecipient(recipient, i);
-					if (issue != null) {
-						validationIssues.add(issue);
-						continue;
+					if(settings.isValidateRecipient()) {
+						Node recipient = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("Recipient");
+						final SubjectConfirmationIssue issue = validateRecipient(recipient, i);
+						if (issue != null) {
+							validationIssues.add(issue);
+							continue;
+						}
 					}
 
 					Node inResponseTo = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("InResponseTo");

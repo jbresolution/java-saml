@@ -122,6 +122,8 @@ public class SettingsBuilder {
 	public final static String SECURITY_REJECT_DEPRECATED_ALGORITHM = "onelogin.saml2.security.reject_deprecated_alg";
 	public final static String SECURITY_ALLOWED_CLOCK_DRIFT = "onelogin.saml2.security.allowed_clock_drift";
 	public final static String SECURITY_VALIDATE_TIMESTAMPS = "onelogin.saml2.security.validate_timestamps";
+	public final static String SECURITY_VALIDATE_RECIPIENT = "onelogin.saml2.security.validate_recipient";
+	public final static String SECURITY_VALIDATE_DESTINATION = "onelogin.saml2.security.validate_destination";
 
 	// Compress
 	public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
@@ -450,6 +452,16 @@ public class SettingsBuilder {
 		Boolean validateTimestamps = loadBooleanProperty(SECURITY_VALIDATE_TIMESTAMPS);
 		if(validateTimestamps != null) {
 			saml2Setting.setValidateTimestamps(validateTimestamps);
+		}
+
+		Boolean validateDestination = loadBooleanProperty(SECURITY_VALIDATE_DESTINATION);
+		if(validateDestination != null) {
+			saml2Setting.setValidateDestination(validateDestination);
+		}
+
+		Boolean validateRecipient = loadBooleanProperty(SECURITY_VALIDATE_RECIPIENT);
+		if(validateRecipient != null) {
+			saml2Setting.setValidateRecipient(validateRecipient);
 		}
 	}
 
