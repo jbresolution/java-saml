@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+                xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Destination="https://jerry-test.apps.twxc.acme.com/plugins/servlet/samlsso" ID="_8219cd8f-fb9b-42bd-8dce-f1eb629d59e5" InResponseTo="_cba8b3f01f60d20729e63c41fc45efa5" IssueInstant="2022-04-29T13:18:44.7883992Z" Version="2.0">
+    <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">https://dnexternal.b2clogin.com/external.acme.com/B2C_1A_Test-InternalJiraSAML</saml:Issuer>
+    <samlp:Status>
+        <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
+    </samlp:Status>
+    <saml:Assertion ID="_baab41a1-0b4e-46d2-ae6e-4a36939cfb25" IssueInstant="2022-04-29T13:18:44.7572263Z" Version="2.0">
+        <saml:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">https://dnexternal.b2clogin.com/dnexternal.onmicrosoft.com/B2C_1A_Test-TrustFrameworkBase</saml:Issuer>
+        <saml:Subject>
+            <saml:NameID>lars.klein</saml:NameID>
+            <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+                <saml:SubjectConfirmationData InResponseTo="_cba8b3f01f60d20729e63c41fc45efa5" NotOnOrAfter="2022-04-29T13:23:44.7572263Z" Recipient="https://jerry-test.apps.twxc.acme.com/plugins/servlet/samlsso"/>
+            </saml:SubjectConfirmation>
+        </saml:Subject>
+        <saml:Conditions NotBefore="2022-04-29T13:18:44.7572263Z" NotOnOrAfter="2022-04-29T13:23:44.7572263Z">
+            <saml:AudienceRestriction>
+                <saml:Audience>https://jerry-test.apps.twxc.acme.com/plugins/servlet/samlsso</saml:Audience>
+            </saml:AudienceRestriction>
+        </saml:Conditions>
+        <saml:AuthnStatement AuthnInstant="2022-04-29T13:18:44.7572263Z" SessionIndex="2a618773-7a67-4077-8ee7-51c50849c6ee">
+            <saml:AuthnContext>
+                <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</saml:AuthnContextClassRef>
+            </saml:AuthnContext>
+        </saml:AuthnStatement>
+    </saml:Assertion>
+</samlp:Response>

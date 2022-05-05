@@ -992,7 +992,7 @@ public class AuthTest {
 		expectedErrors = new ArrayList<String>();
 		expectedErrors.add("invalid_response");
 		assertEquals(expectedErrors, auth2.getErrors());
-		assertThat(auth2.getLastErrorReason(), containsString("Invalid issuer in the Assertion/Response"));
+		assertThat(auth2.getLastErrorReason(), containsString("Invalid issuer in the Response"));
 		assertTrue(auth2.getLastValidationException() instanceof ValidationError);
 
 		samlResponseEncoded = Util.getFileAsString("data/responses/valid_response.xml.base64");

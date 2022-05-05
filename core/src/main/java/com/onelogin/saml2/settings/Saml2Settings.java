@@ -48,6 +48,8 @@ public class Saml2Settings {
 
 	// IdP
 	private String idpEntityId = "";
+
+	private List<String> acceptedIssuers = new ArrayList<>();
 	private URL idpSingleSignOnServiceUrl = null;
 	private String idpSingleSignOnServiceBinding = Constants.BINDING_HTTP_REDIRECT;
 	private URL idpSingleLogoutServiceUrl = null;
@@ -188,6 +190,10 @@ public class Saml2Settings {
 	 */
 	public final String getIdpEntityId() {
 		return idpEntityId;
+	}
+
+	public List<String> getAcceptedIssuers() {
+		return acceptedIssuers;
 	}
 
 	/**
@@ -559,6 +565,10 @@ public class Saml2Settings {
 	 */
 	protected final void setIdpEntityId(String idpEntityId) {
 		this.idpEntityId = idpEntityId;
+	}
+
+	protected final void setAcceptedIssuers(List<String> issuers) {
+		this.acceptedIssuers = new ArrayList<>(issuers);
 	}
 
 	/**
