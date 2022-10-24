@@ -77,6 +77,7 @@ public class Saml2Settings {
 	private boolean validateTimestamps = true;
 	private boolean validateDestination = true;
 	private boolean validateRecipient = true;
+	private boolean validateAudience = true;
 
 	private String requestedAuthnContextComparison = "exact";
 	private boolean wantXMLValidation = true;
@@ -100,7 +101,7 @@ public class Saml2Settings {
 	private Organization organization = null;
 
 	private boolean spValidationOnly = false;
-	
+
 	/**
 	 * @return the strict setting value
 	 */
@@ -971,6 +972,14 @@ public class Saml2Settings {
 
 	public boolean isValidateDestination() {
 		return this.validateDestination;
+	}
+
+	public void setValidateAudience(boolean validateAudience) {
+		this.validateAudience = validateAudience;
+	}
+
+	public boolean isValidateAudience() {
+		return this.validateAudience;
 	}
 
 	public boolean isValidateRecipient() {
