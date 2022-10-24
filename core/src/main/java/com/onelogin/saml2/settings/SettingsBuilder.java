@@ -127,6 +127,8 @@ public class SettingsBuilder {
 	public final static String SECURITY_VALIDATE_RECIPIENT = "onelogin.saml2.security.validate_recipient";
 	public final static String SECURITY_VALIDATE_DESTINATION = "onelogin.saml2.security.validate_destination";
 
+	public final static String SECURITY_VALIDATE_AUDIENCE = "onelogin.saml2.security.validate_audience";
+
 	// Compress
 	public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
 	public final static String COMPRESS_RESPONSE = "onelogin.saml2.compress.response";
@@ -469,6 +471,11 @@ public class SettingsBuilder {
 		Boolean validateRecipient = loadBooleanProperty(SECURITY_VALIDATE_RECIPIENT);
 		if(validateRecipient != null) {
 			saml2Setting.setValidateRecipient(validateRecipient);
+		}
+
+		Boolean validateAudience = loadBooleanProperty(SECURITY_VALIDATE_AUDIENCE);
+		if (validateAudience != null) {
+			saml2Setting.setValidateAudience(validateAudience);
 		}
 	}
 
