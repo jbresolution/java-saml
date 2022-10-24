@@ -355,7 +355,9 @@ public class SamlResponse {
 				}
 
 				// Check Audiences
-				validateAudiences();
+				if (settings.isValidateAudience()) {
+					validateAudiences();
+				}
 
 				// Check the issuers
 				String responseIssuer = this.getResponseIssuer();
