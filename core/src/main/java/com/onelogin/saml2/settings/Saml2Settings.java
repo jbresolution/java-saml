@@ -78,6 +78,7 @@ public class Saml2Settings {
 	private boolean validateDestination = true;
 	private boolean validateRecipient = true;
 	private boolean validateAudience = true;
+	private boolean acceptHolderOfKeyLikeBearer = false;
 
 	private String requestedAuthnContextComparison = "exact";
 	private boolean wantXMLValidation = true;
@@ -980,6 +981,14 @@ public class Saml2Settings {
 
 	public boolean isValidateAudience() {
 		return this.validateAudience;
+	}
+
+	public boolean isAcceptHolderOfKeyLikeBearer() {
+		return acceptHolderOfKeyLikeBearer;
+	}
+
+	public void setAcceptHolderOfKeyLikeBearer(boolean acceptHolderOfKeyLikeBearer) {
+		this.acceptHolderOfKeyLikeBearer = acceptHolderOfKeyLikeBearer;
 	}
 
 	public boolean isValidateRecipient() {

@@ -29,11 +29,11 @@ definitions:
         # read the existing version
         - export VERSION=$(printf 'VER\t${project.version}' | atlas-mvn help:evaluate | grep '^VER' | cut -f2)
 
-        # Include the branch-name (or the appropriate fallback) in the version if its a SNAPSHOT,
+        # Include the branch-name (or the appropriate fallback) in the version if it's a SNAPSHOT,
         #  e.g. 1.0.0-SNAPSHOT in branch feature/something is turned into 1.0.0-featuresomething-SNAPSHOT
         - case $VERSION in *"SNAPSHOT") export VERSION="${VERSION%-SNAPSHOT}-${VERSION_DETAIL}" ;; esac
 
-        # If FullVersionOverride is set us this as version, otherwise
+        # If FullVersionOverride is set use this as version, otherwise
         # drop all non-alphanumeric characters except . and - and remove double -
         - export VERSION=${FullVersionOverride:-$(echo ${VERSION} | sed -e 's/[^a-zA-Z0-9.-]/-/g' -e 's/-\{2,\}/-/g')}
 

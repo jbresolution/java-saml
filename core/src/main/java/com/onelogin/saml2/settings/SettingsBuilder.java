@@ -112,6 +112,8 @@ public class SettingsBuilder {
 
 	public final static String SECURITY_VALIDATE_AUDIENCE = "onelogin.saml2.security.validate_audience";
 
+	public final static String SECURITY_ACCEPT_HOK_LIKE_BEARER = "onelogin.saml2.security.accept_hok_like_bearer";
+
 	// Compress
 	public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
 	public final static String COMPRESS_RESPONSE = "onelogin.saml2.compress.response";
@@ -455,6 +457,11 @@ public class SettingsBuilder {
 		Boolean validateAudience = loadBooleanProperty(SECURITY_VALIDATE_AUDIENCE);
 		if (validateAudience != null) {
 			saml2Setting.setValidateAudience(validateAudience);
+		}
+
+		Boolean acceptHokLikeBearer = loadBooleanProperty(SECURITY_ACCEPT_HOK_LIKE_BEARER);
+		if(acceptHokLikeBearer != null) {
+			saml2Setting.setAcceptHolderOfKeyLikeBearer(acceptHokLikeBearer);
 		}
 	}
 

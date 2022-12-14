@@ -455,7 +455,12 @@ public class SamlResponse {
 			Node scn = subjectConfirmationNodes.item(i);
 
 			Node method = scn.getAttributes().getNamedItem("Method");
-			if (method != null && !method.getNodeValue().equals(Constants.CM_BEARER)) {
+
+			boolean acceptedMethod = method != null && method.getNodeValue().equals(Constants.CM_BEARER);
+
+			acceptedMethod = acceptedMethod || (settings.isAcceptHolderOfKeyLikeBearer() && method != null && method.getNodeValue().equals(Constants.CM_HOLDER_KEY));
+
+			if (!acceptedMethod) {
 				continue;
 			}
 
