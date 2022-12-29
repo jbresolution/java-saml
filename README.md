@@ -1,9 +1,8 @@
-# OneLogin's SAML Java Toolkit
+# SAML Java Toolkit <!-- omit in toc -->
 
 [![Build Status](https://travis-ci.org/onelogin/java-saml.svg?branch=master)](https://travis-ci.org/onelogin/java-saml) [![Coverage Status](https://coveralls.io/repos/github/onelogin/java-saml/badge.svg?branch=master)](https://coveralls.io/github/onelogin/java-saml?branch=master)
 
 Add SAML support to your Java applications using this library.
-Forget those complicated libraries and use that open source library provided and supported by OneLogin Inc.
 
 2.8.0 uses xmlsec 2.2.3 which fixes [CVE-2021-40690](https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-1655558)
 
@@ -17,17 +16,56 @@ Version 2.0.0 - 2.4.0, compatible with java7 / java8.
 
 We [introduced some incompatibilities](https://github.com/onelogin/java-saml/issues/90), that could be fixed and make it compatible with java6.
 
-Version 1.1.2 is considered to be deprecated. If you have used it, we strongly recommend that you migrate to the new version. 
+Version 1.1.2 is considered to be deprecated. If you have used it, we strongly recommend that you migrate to the new version.
 We rebuilt the toolkit on 2.0.0, so code/settings that you had been using in the previous version will no longer be compatible.
 
+- [Why add SAML support to my software?](#why-add-saml-support-to-my-software)
+- [General description](#general-description)
+- [Security warning](#security-warning)
+- [Installation](#installation)
+  - [Hosting](#hosting)
+    - [Github](#github)
+    - [Maven](#maven)
+  - [Dependencies](#dependencies)
+- [Working with the github repository code and Eclipse.](#working-with-the-github-repository-code-and-eclipse)
+  - [Get the toolkit.](#get-the-toolkit)
+  - [Adding java-saml toolkit components as a project](#adding-java-saml-toolkit-components-as-a-project)
+  - [Adding the java-saml-tookit-jspsample as a project](#adding-the-java-saml-tookit-jspsample-as-a-project)
+  - [Deploy the java-saml-tookit-jspsample](#deploy-the-java-saml-tookit-jspsample)
+- [Getting started](#getting-started)
+  - [Learning the toolkit](#learning-the-toolkit)
+    - [core (com.onelogin:java-saml-core)](#core-comoneloginjava-saml-core)
+    - [toolkit (com.onelogin:java-saml)](#toolkit-comoneloginjava-saml)
+    - [samples (com.onelogin:java-saml-tookit-samples)](#samples-comoneloginjava-saml-tookit-samples)
+  - [How it works](#how-it-works)
+    - [Javadocs](#javadocs)
+    - [Settings](#settings)
+      - [Properties File](#properties-file)
+      - [KeyStores](#keystores)
+      - [Dynamic Settings](#dynamic-settings)
+    - [The HttpRequest](#the-httprequest)
+    - [Initiate SSO](#initiate-sso)
+    - [The SP Endpoints](#the-sp-endpoints)
+      - [SP Metadata](#sp-metadata)
+      - [Attribute Consumer Service(ACS)](#attribute-consumer-serviceacs)
+      - [Single Logout Service (SLS)](#single-logout-service-sls)
+    - [Initiate SLO](#initiate-slo)
+  - [Extending the provided implementation](#extending-the-provided-implementation)
+  - [Working behind load balancer](#working-behind-load-balancer)
+  - [IdP with multiple certificates](#idp-with-multiple-certificates)
+  - [Replay attacks](#replay-attacks)
+- [Demo included in the toolkit](#demo-included-in-the-toolkit)
+    - [SP setup](#sp-setup)
+    - [IdP setup](#idp-setup)
+    - [How it works](#how-it-works-1)
 
 ## Why add SAML support to my software?
 
 SAML is an XML-based standard for web browser single sign-on and is defined by
-the OASIS Security Services Technical Committee. The standard has been around 
+the OASIS Security Services Technical Committee. The standard has been around
 since 2002, but lately it has become popular due to its advantages as follows:
 
- * **Usability** - One-click access from portals or intranets, deep linking, 
+ * **Usability** - One-click access from portals or intranets, deep linking,
    password elimination and automatically renewing sessions make life
    easier for the user.
  * **Security** - Based on strong digital signatures for authentication and
@@ -40,13 +78,13 @@ since 2002, but lately it has become popular due to its advantages as follows:
  * **IT Friendly** - SAML simplifies life for IT because it centralizes
    authentication, provides greater visibility and makes directory
    integration easier.
- * **Opportunity** - B2B cloud vendor should support SAML to facilitate the 
+ * **Opportunity** - B2B cloud vendor should support SAML to facilitate the
    integration of their product.
 
 
 ## General description
 
-OneLogin's SAML Java toolkit lets you turn a Java application into a SP
+SAML Java toolkit lets you turn a Java application into a SP
 (Service Provider) that can be connected to an IdP (Identity Provider).
 
 Supports:
@@ -67,7 +105,6 @@ Key features:
  * **Easy to use** - Programmer will be allowed to code high-level and
    low-level programming; 2 easy-to-use APIs are available.
  * **Tested** - Thoroughly tested.
- * **Popular** - OneLogin's customers use it. Add easy support to your java web projects.
 
 ## Security warning
 
@@ -75,7 +112,7 @@ In production, the **onelogin.saml2.strict** setting parameter MUST be set as **
 
 In production also we highly recommend to register on the settings the IdP certificate instead of using the fingerprint method. The fingerprint, is a hash, so at the end is open to a collision attack that can end on a signature validation bypass. Other SAML toolkits deprecated that mechanism, we maintain it for compatibility and also to be used on test environment.
 
-The IdPMetadataParser class does not validate in any way the URL that is introduced in order to be parsed. 
+The IdPMetadataParser class does not validate in any way the URL that is introduced in order to be parsed.
 
 Usually the same administrator that handles the Service Provider also sets the URL to the IdP, which should be a trusted resource.
 
@@ -97,7 +134,7 @@ Install it as a maven dependency:
   <dependency>
       <groupId>com.onelogin</groupId>
       <artifactId>java-saml</artifactId>
-      <version>2.6.0</version>
+      <version>2.9.0</version>
   </dependency>
 ```
 
@@ -157,7 +194,7 @@ Select a [Tomcat Server](http://crunchify.com/step-by-step-guide-to-setup-and-in
 ## Getting started
 ### Learning the toolkit
 
-OneLogin's new SAML Java SAML Toolkit contains different folders (core, toolkit, samples) and some files.
+Java SAML Toolkit contains different folders (core, toolkit, samples) and some files.
 
 Let's start describing them:
 
@@ -220,7 +257,7 @@ onelogin.saml2.sp.entityid = http://localhost:8080/java-saml-tookit-jspsample/me
 onelogin.saml2.sp.assertion_consumer_service.url = http://localhost:8080/java-saml-tookit-jspsample/acs.jsp
 
 # SAML protocol binding to be used when returning the <Response>
-# message.  Onelogin Toolkit supports for this endpoint the
+# message.  SAMLToolkit supports for this endpoint the
 # HTTP-POST binding only
 onelogin.saml2.sp.assertion_consumer_service.binding = urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST
 
@@ -229,7 +266,7 @@ onelogin.saml2.sp.assertion_consumer_service.binding = urn:oasis:names:tc:SAML:2
 onelogin.saml2.sp.single_logout_service.url = http://localhost:8080/java-saml-tookit-jspsample/sls.jsp
 
 # SAML protocol binding to be used when returning the <LogoutResponse> or sending the <LogoutRequest>
-# message.  Onelogin Toolkit supports for this endpoint the
+# message.  SAMLToolkit supports for this endpoint the
 # HTTP-Redirect binding only
 onelogin.saml2.sp.single_logout_service.binding = urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 
@@ -246,9 +283,34 @@ onelogin.saml2.sp.x509cert =
 # Future SP certificate, to be used during SP Key roll over
 onelogin.saml2.sp.x509certNew =
 
-# Requires Format PKCS#8   BEGIN PRIVATE KEY       
+# Requires Format PKCS#8   BEGIN PRIVATE KEY
 # If you have     PKCS#1   BEGIN RSA PRIVATE KEY  convert it by   openssl pkcs8 -topk8 -inform pem -nocrypt -in sp.rsa_key -outform pem -out sp.pem
 onelogin.saml2.sp.privatekey =
+
+# Organization
+onelogin.saml2.organization.name = SP Java
+onelogin.saml2.organization.displayname = SP Java Example
+onelogin.saml2.organization.url = http://sp.example.com
+onelogin.saml2.organization.lang = en
+
+# Contacts (use indexes to specify multiple contacts, multiple e-mail addresses per contact, multiple phone numbers per contact)
+onelogin.saml2.sp.contact[0].contactType=administrative
+onelogin.saml2.sp.contact[0].company=ACME
+onelogin.saml2.sp.contact[0].given_name=Guy
+onelogin.saml2.sp.contact[0].sur_name=Administrative
+onelogin.saml2.sp.contact[0].email_address[0]=administrative@example.com
+onelogin.saml2.sp.contact[0].email_address[1]=administrative2@example.com
+onelogin.saml2.sp.contact[0].telephone_number[0]=+1-123456789
+onelogin.saml2.sp.contact[0].telephone_number[1]=+1-987654321
+onelogin.saml2.sp.contact[1].contactType=other
+onelogin.saml2.sp.contact[1].company=Big Corp
+onelogin.saml2.sp.contact[1].email_address=info@example.com
+
+# Legacy contacts (legacy way to specify just a technical and a support contact with minimal info)
+onelogin.saml2.contacts.technical.given_name = Technical Guy
+onelogin.saml2.contacts.technical.email_address = technical@example.com
+onelogin.saml2.contacts.support.given_name = Support Guy
+onelogin.saml2.contacts.support.email_address = support@example.com
 
 ## Identity Provider Data that we want connect with our SP ##
 
@@ -259,8 +321,8 @@ onelogin.saml2.idp.entityid =
 # URL Target of the IdP where the SP will send the Authentication Request Message
 onelogin.saml2.idp.single_sign_on_service.url =
 
-# SAML protocol binding to be used to deliver the <AuthnRequest> message 
-# to the IdP.  Onelogin Toolkit supports for this endpoint the
+# SAML protocol binding to be used to deliver the <AuthnRequest> message
+# to the IdP.  SAMLToolkit supports for this endpoint the
 # HTTP-Redirect binding only
 onelogin.saml2.idp.single_sign_on_service.binding = urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 
@@ -274,7 +336,7 @@ onelogin.saml2.idp.single_logout_service.url =
 onelogin.saml2.idp.single_logout_service.response.url =
 
 # SAML protocol binding to be used when returning the <Response>
-# message.  Onelogin Toolkit supports for this endpoint the
+# message.  SAMLToolkit supports for this endpoint the
 # HTTP-Redirect binding only
 onelogin.saml2.idp.single_logout_service.binding = urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect
 
@@ -291,7 +353,7 @@ onelogin.saml2.idp.x509cert =
 # If a fingerprint is provided, then the certFingerprintAlgorithm is required in order to
 # let the toolkit know which Algorithm was used. Possible values: sha1, sha256, sha384 or sha512
 # 'sha1' is the default value.
-# onelogin.saml2.idp.certfingerprint = 
+# onelogin.saml2.idp.certfingerprint =
 # onelogin.saml2.idp.certfingerprint_algorithm = sha256
 
 # Security settings
@@ -321,7 +383,7 @@ onelogin.saml2.security.want_messages_signed = false
 onelogin.saml2.security.want_assertions_signed = false
 
 # Indicates a requirement for the Metadata of this SP to be signed.
-# Right now supported null (in order to not sign) or true (sign using SP private key) 
+# Right now supported null (in order to not sign) or true (sign using SP private key)
 onelogin.saml2.security.sign_metadata =
 
 # Indicates a requirement for the Assertions received by this SP to be encrypted
@@ -369,22 +431,10 @@ onelogin.saml2.security.reject_deprecated_alg = true
 # SAML specification states that no trimming for string elements should be performed, so no trimming will be
 # performed by default on extracted Name IDs and attribute values. However, some SAML implementations may add
 # undesirable surrounding whitespace when outputting XML (possibly due to formatting/pretty-printing).
-# These two options allow to optionally enable value trimming on extracted Name IDs (including issuers) and 
+# These two options allow to optionally enable value trimming on extracted Name IDs (including issuers) and
 # attribute values.
 onelogin.saml2.parsing.trim_name_ids = false
 onelogin.saml2.parsing.trim_attribute_values = false
-
-# Organization
-onelogin.saml2.organization.name = SP Java 
-onelogin.saml2.organization.displayname = SP Java Example
-onelogin.saml2.organization.url = http://sp.example.com
-onelogin.saml2.organization.lang = en
-
-# Contacts
-onelogin.saml2.contacts.technical.given_name = Technical Guy
-onelogin.saml2.contacts.technical.email_address = technical@example.com
-onelogin.saml2.contacts.support.given_name = Support Guy
-onelogin.saml2.contacts.support.email_address = support@example.com
 
 # Prefix used in generated Unique IDs.
 # Optional, defaults to ONELOGIN_ or full ID is like ONELOGIN_ebb0badd-4f60-4b38-b20a-a8e01f0592b1.
@@ -652,7 +702,7 @@ and later executing the redirection manually.
 
 ### Extending the provided implementation
 
-All the provided SAML message classes (`AuthnRequest`, `SamlResponse`, `LogoutRequest`, `LogoutResponse`) can be extended to add or change the processing behavior. 
+All the provided SAML message classes (`AuthnRequest`, `SamlResponse`, `LogoutRequest`, `LogoutResponse`) can be extended to add or change the processing behavior.
 
 In particular, the classes used to produce outgoing messages (`AuthnRequest`, `LogoutRequest`, and `LogoutResponse`) also provide a `postProcessXml` method that can be overridden to customise the generation of the corresponding SAML message XML, along with the ability to pass in proper extensions of the input parameter classes (`AuthnRequestParams`, `LogoutRequestParams`, and `LogoutResponseParams` respectively).
 
@@ -670,7 +720,7 @@ auth.setSamlMessageFactory(new SamlMessageFactory() {
 	public SamlResponse createSamlResponse(Saml2Settings settings, HttpRequest request) throws Exception {
 		return new SamlResponseEx(settings, request);
 	}
-}); 
+});
 // then proceed with login...
 auth.login(relayState, new AuthnRequestParamsEx()); // the custom generation of AuthnReqeustEx will be executed
 // ... or process the response as usual
@@ -687,12 +737,12 @@ For Apache Tomcat this is done by setting the proxyName, proxyPort, scheme and s
 
 
 ### IdP with multiple certificates
- 
+
  In some scenarios the IdP uses different certificates for
  signing/encryption, or is under key rollover phase and more than one certificate is published on IdP metadata.
- 
+
  In order to handle that the toolkit offers the `onelogin.saml2.idp.x509certMulti` parameters where you can set additional certificates that will be used to validate IdP signature. However just the certificate set in `onelogin.saml2.idp.x509cert` parameter will be used for encrypting.
- 
+
 
 ### Replay attacks
 
@@ -701,7 +751,7 @@ In order to avoid replay attacks, you can store the ID of the SAML messages alre
 Get the ID of the last processed message with the getLastMessageId method of the Auth object.
 
 ## Demo included in the toolkit
-The Onelogin's Java Toolkit allows you to provide the settings in a unique file as described at the [Settings  section](https://github.com/onelogin/java-saml/#Settings).
+The Java Toolkit allows you to provide the settings in a unique file as described at the [Settings  section](https://github.com/onelogin/java-saml/#Settings).
 
 #### SP setup
 Configure the SP part and review the metadata of the IdP and complete the IdP info. Later configure how the toolkit will work enabling/disabling the security settings.

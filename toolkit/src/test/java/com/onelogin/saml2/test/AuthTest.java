@@ -30,6 +30,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,7 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.joda.time.Instant;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -303,7 +303,7 @@ public class AuthTest {
 		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.sperrors.properties").build();
 		
 		expectedEx.expect(SettingsException.class);
-		expectedEx.expectMessage("Invalid settings: sp_entityId_not_found, sp_acs_not_found, sp_cert_not_found_and_required, contact_not_enough_data, organization_not_enough_data, idp_cert_or_fingerprint_not_found_and_required, idp_cert_not_found_and_required");
+		expectedEx.expectMessage("Invalid settings: sp_entityId_not_found, sp_acs_not_found, sp_cert_not_found_and_required, contact_not_enough_data, contact_type_invalid, organization_not_enough_data, idp_cert_or_fingerprint_not_found_and_required, idp_cert_not_found_and_required");
 		new Auth(settings, request, response);
 	}
 
@@ -1244,7 +1244,7 @@ public class AuthTest {
 		auth.processResponse();
 
 		assertThat(auth.getLastAssertionId(), is("pfxb26bb203-4e9d-8e74-a46e-def275ff4c7b"));
-		assertThat(auth.getLastAssertionNotOnOrAfter(), contains(new Instant("2053-08-23T06:57:01Z")));
+		assertThat(auth.getLastAssertionNotOnOrAfter(), contains(Instant.parse("2053-08-23T06:57:01Z")));
 	}
 
 	/**
@@ -1275,7 +1275,7 @@ public class AuthTest {
 		assertNull(auth2.getSessionExpiration());
 		auth2.processResponse();
 		assertTrue(auth2.isAuthenticated());
-		assertEquals(2639545021000L, auth2.getSessionExpiration().getMillis());
+		assertEquals(2639545021000L, auth2.getSessionExpiration().toEpochMilli());
 	}
 
 	/**
