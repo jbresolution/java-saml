@@ -2130,6 +2130,15 @@ public class AuthnResponseTest {
 	}
 
 	@Test
+	public void testIsValidSubjectConfirmation_methodHok() throws Exception {
+		final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.accept_hok.properties").build();
+
+		final String samlResponseEncoded = Util.getFileAsString("data/responses/invalids/no_subjectconfirmation_method.xml.base64");
+
+		assertResponseValid(settings, samlResponseEncoded, true, false, "No Signature found. SAML Response rejected");
+	}
+
+	@Test
 	public void testIsValidSubjectConfirmation_noSubjectConfirmationData() throws Exception {
 		final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 		final String samlResponseEncoded = Util.getFileAsString("data/responses/invalids/no_subjectconfirmation_data.xml.base64");
