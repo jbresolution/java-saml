@@ -1,0 +1,59 @@
+image: resolutiongmbh/atlassian-plugin-sdk-with-node:jdk11
+
+clone:
+  depth: full  # SonarCloud scanner needs the full history to assign issues properly
+
+definitions:
+
+  stepBuild: &stepBuild
+    step:
+      name: Build
+      caches:
+        - maven
+      script:
+        - export PATHPART=${BITBUCKET_BRANCH}
+        - echo PATHPART=$PATHPART >> env.txt
+
+        # Read First 7 digits of the commit-id
+        - export SHORTREV="${BITBUCKET_COMMIT::7}"
+
+        # Use first set value for VERSION_DETAIL in this order
+        # VersionName, branch, tag, commit-id
+        # Append -SNAPSHOT because the version can keep stable over multiple pipeline-runs
+        - export VERSION_DETAIL="${VersionName:-${BITBUCKET_BRANCH:-${BITBUCKET_TAG:-${SHORTREV}}}}-SNAPSHOT"
+
+        # In these branches we always use the commit-id.
+        # Don't add -SNAPSHOT as this version should be stable
+        - case $BITBUCKET_BRANCH in prerelease*|support*|release*|maintenance*|hotfix*|master|develop) export VERSION_DETAIL=${SHORTREV} ;; esac
+
+        # read the existing version
+        - export VERSION=$(printf 'VER\t${project.version}' | atlas-mvn help:evaluate | grep '^VER' | cut -f2)
+
+        # Include the branch-name (or the appropriate fallback) in the version if it's a SNAPSHOT,
+        #  e.g. 1.0.0-SNAPSHOT in branch feature/something is turned into 1.0.0-featuresomething-SNAPSHOT
+        - case $VERSION in *"SNAPSHOT") export VERSION="${VERSION%-SNAPSHOT}-${VERSION_DETAIL}" ;; esac
+
+        # If FullVersionOverride is set use this as version, otherwise
+        # drop all non-alphanumeric characters except . and - and remove double -
+        - export VERSION=${FullVersionOverride:-$(echo ${VERSION} | sed -e 's/[^a-zA-Z0-9.-]/-/g' -e 's/-\{2,\}/-/g')}
+
+        # Update the version
+        - atlas-mvn versions:set -DnewVersion=${VERSION}
+
+        - atlas-mvn clean deploy
+        - export BUILD_STATUS="{\"key\":\"build\", \"state\":\"SUCCESSFUL\", \"name\":\"${VERSION}\", \"url\":\"https://www.resolution.de\"}"
+        - curl -H "Content-Type:application/json" -X POST --user "${BB_AUTH_STRING}" -d "${BUILD_STATUS}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/commit/${BITBUCKET_COMMIT}/statuses/build"
+
+      artifacts:
+        - '**/pom.xml'
+        - pom.xml
+
+pipelines:
+
+  branches:
+    '{resolutionfork,master,develop,release/*,prerelease/*}':
+      - <<: *stepBuild
+
+  pull-requests:
+    '**':
+      - <<: *stepBuild
