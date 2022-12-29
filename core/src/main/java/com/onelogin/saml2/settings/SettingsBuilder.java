@@ -89,6 +89,8 @@ public class SettingsBuilder {
 
 	// IDP
 	public final static String IDP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.idp.entityid";
+
+	public final static String IDP_ACCEPTED_ISSUERS_PROPERTY_KEY = "onelogin.saml2.idp.accepted_issuers";
 	public final static String IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.url";
 	public final static String IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.binding";
 	public final static String IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.url";
@@ -312,6 +314,11 @@ public class SettingsBuilder {
 		String idpEntityID = loadStringProperty(IDP_ENTITYID_PROPERTY_KEY);
 		if (idpEntityID != null) {
 			saml2Setting.setIdpEntityId(idpEntityID);
+		}
+
+		List<String> acceptedIssuers = loadListProperty(IDP_ACCEPTED_ISSUERS_PROPERTY_KEY);
+		if(acceptedIssuers != null) {
+			saml2Setting.setAcceptedIssuers(acceptedIssuers);
 		}
 
 		URL idpSingleSignOnServiceUrl = loadURLProperty(IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY);

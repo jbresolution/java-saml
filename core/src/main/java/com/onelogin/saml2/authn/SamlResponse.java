@@ -358,13 +358,20 @@ public class SamlResponse {
 				validateAudiences();
 
 				// Check the issuers
-				List<String> issuers = this.getIssuers();
-				for (final String issuer : issuers) {
-					if (issuer.isEmpty() || !issuer.equals(settings.getIdpEntityId())) {
-						throw new ValidationError(
-								String.format("Invalid issuer in the Assertion/Response. Was '%s', but expected '%s'", issuer, settings.getIdpEntityId()),
-								ValidationError.WRONG_ISSUER);
-					}
+				String responseIssuer = this.getResponseIssuer();
+				if(responseIssuer == null
+						|| responseIssuer.isEmpty()
+						|| (!responseIssuer.equals(settings.getIdpEntityId()) && !settings.getAcceptedIssuers().contains(responseIssuer))) {
+					throw new ValidationError(String.format("Invalid issuer in the Response. Was '%s', but expected '%s'", responseIssuer, settings.getIdpEntityId()),
+							ValidationError.WRONG_ISSUER);
+				}
+
+				String assertionIssuer = this.getAssertionIssuer();
+				if(assertionIssuer == null
+						|| assertionIssuer.isEmpty()
+						|| (!assertionIssuer.equals(settings.getIdpEntityId()) && !settings.getAcceptedIssuers().contains(assertionIssuer))) {
+					throw new ValidationError(String.format("Invalid issuer in the Assertion. Was '%s', but expected '%s'", assertionIssuer, settings.getIdpEntityId()),
+							ValidationError.WRONG_ISSUER);
 				}
 
 				// Check the session Expiration
