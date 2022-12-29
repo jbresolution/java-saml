@@ -669,9 +669,14 @@ public class AuthnRequestTest {
 		AuthnRequestParams params = new AuthnRequestParams(false,false,false,true,null,null,false,null);
 		AuthnRequest authnRequest = new AuthnRequest(settings,params);
 		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"http://localhost:8080/java-saml-jspsample/acs.jsp\""));
+
 
 		params = new AuthnRequestParams(false,false,false,true,null,null,false,new URL("https://special.url"));
 		authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"https://special.url\""));
+
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"https://special.url\""));
+
 	}
 }

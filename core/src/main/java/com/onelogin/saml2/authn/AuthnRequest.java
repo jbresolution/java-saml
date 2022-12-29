@@ -205,11 +205,9 @@ public class AuthnRequest {
 		valueMap.put("forceAuthnStr", forceAuthnStr);
 		valueMap.put("isPassiveStr", isPassiveStr);
 
+
 		String destinationStr = "";
-		URL sso = params.getSpConsumerUrl();
-		if(sso == null) {
-			sso = settings.getIdpSingleSignOnServiceUrl();
-		}
+		URL sso =  settings.getIdpSingleSignOnServiceUrl();
 		if (sso != null) {
 			destinationStr = " Destination=\"" + Util.toXml(sso.toString()) + "\"";
 		}
