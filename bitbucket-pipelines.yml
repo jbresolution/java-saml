@@ -51,7 +51,7 @@ definitions:
 pipelines:
 
   branches:
-    '{resolutionfork,master,develop,release/*,prerelease/*}':
+    '{resolutionmaster,master,develop,release/*,prerelease/*}':
       - <<: *stepBuild
 
   pull-requests:
