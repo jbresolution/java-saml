@@ -40,7 +40,7 @@ definitions:
         # Update the version
         - atlas-mvn versions:set -DnewVersion=${VERSION}
 
-        - atlas-mvn clean deploy
+        - atlas-mvn clean deploy -DnvdApiKey=$NVD_API_KEY
         - export BUILD_STATUS="{\"key\":\"build\", \"state\":\"SUCCESSFUL\", \"name\":\"${VERSION}\", \"url\":\"https://www.resolution.de\"}"
         - curl -H "Content-Type:application/json" -X POST --user "${BB_AUTH_STRING}" -d "${BUILD_STATUS}" "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}/commit/${BITBUCKET_COMMIT}/statuses/build"
 
