@@ -639,27 +639,27 @@ public class AuthnRequestTest {
 		// AuthnRequest must not contain a ProtocolBinding-attribute
 		AuthnRequestParams params = new AuthnRequestParams(false,false,false,true,null,null,false,null);
 		AuthnRequest authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"")));
+		assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"")));
 
 		// AuthnRequest must contain the ProtocolBinding from setting if includeProtocolValue is true and protocolBinding is null
 		params = new AuthnRequestParams(false,false,false,true,null,null,true,null);
 		authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
 
 		// AuthnRequest must contain the ProtocolBinding from parameter
 		params = new AuthnRequestParams(false,false,false,true,null,"testBindingValue",true,null);
 		authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"testBindingValue\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"testBindingValue\""));
 
 		// AuthnRequest must not contain the ProtocolBinding from parameter if includeProtocolBinding is false
 		params = new AuthnRequestParams(false,false,false,true,null,"testBindingValue",false,null);
 		authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"testBindingValue\"")));
+		assertThat(authnRequest.getAuthnRequestXml(),not(containsString("ProtocolBinding=\"testBindingValue\"")));
 
 		// AuthnRequest must contain the ProtocolBinding from setting when using simpler constructor
 		params = new AuthnRequestParams(false,false,false,null);
 		authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("ProtocolBinding=\"" + defaultBinding + "\""));
 	}
 
 	@Test
@@ -667,15 +667,15 @@ public class AuthnRequestTest {
 		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 		AuthnRequestParams params = new AuthnRequestParams(false,false,false,true,null,null,false,null);
 		AuthnRequest authnRequest = new AuthnRequest(settings,params);
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"http://localhost:8080/java-saml-jspsample/acs.jsp\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"http://localhost:8080/java-saml-jspsample/acs.jsp\""));
 
 
 		params = new AuthnRequestParams(false,false,false,true,null,null,false,new URL("https://special.url"));
 		authnRequest = new AuthnRequest(settings,params);
 
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
-		Assert.assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"https://special.url\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+		assertThat(authnRequest.getAuthnRequestXml(),containsString("AssertionConsumerServiceURL=\"https://special.url\""));
 
 	}
 }
