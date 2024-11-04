@@ -732,12 +732,8 @@ public class SamlResponse {
 	public void checkStatus() throws ValidationError {
 		this.responseStatus = getStatus(samlResponseDocument);
 		if (!this.responseStatus.is(Constants.STATUS_SUCCESS)) {
-			String statusExceptionMsg = "The status code of the Response was not Success, was "
-					+ this.responseStatus.getStatusCode();
-			if (this.responseStatus.getStatusMessage() != null) {
-				statusExceptionMsg += " -> " + this.responseStatus.getStatusMessage();
-			}
-			throw new ValidationError(statusExceptionMsg, ValidationError.STATUS_CODE_IS_NOT_SUCCESS);
+			String statusExceptionMsg = "The status code of the Response was not Success, was " + this.responseStatus.getStatusCode();
+			throw new ValidationError(statusExceptionMsg, ValidationError.STATUS_CODE_IS_NOT_SUCCESS, this.responseStatus.getStatusMessage());
 		}
 	}
 

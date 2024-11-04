@@ -56,14 +56,24 @@ public class ValidationError extends SAMLException {
 	public static final int INVALID_ISSUE_INSTANT_FORMAT = 49;
 
 	private int errorCode;
+	private String statusMessage;
 
-	public ValidationError(String message, int errorCode) {
+	public ValidationError(String message, int errorCode, String statusMessage) {
 		super(message);
 		this.errorCode = errorCode;
+		this.statusMessage = statusMessage;
 	}
-	
+
+	public ValidationError(String message, int errorCode) {
+		this(message, errorCode, null);
+	}
+
 	public int getErrorCode() {
 		return errorCode;
+	}
+
+	public String getStatusMessage() {
+		return statusMessage;
 	}
 
 }

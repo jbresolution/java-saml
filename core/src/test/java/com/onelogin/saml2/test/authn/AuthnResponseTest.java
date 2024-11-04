@@ -13,10 +13,7 @@ import com.onelogin.saml2.util.DateTimeTestUtils;
 import com.onelogin.saml2.util.Util;
 
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -752,10 +749,16 @@ public class AuthnResponseTest {
 
 		String samlResponseEncoded = Util.getFileAsString("data/responses/invalids/status_code_responder_and_msg.xml.base64");
 		SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
-		
-		expectedEx.expect(ValidationError.class);
-		expectedEx.expectMessage("The status code of the Response was not Success, was urn:oasis:names:tc:SAML:2.0:status:Responder -> something_is_wrong");
-		samlResponse.checkStatus();
+
+		try {
+			samlResponse.checkStatus();
+		} catch (ValidationError e) {
+			assertEquals("The status code of the Response was not Success, was urn:oasis:names:tc:SAML:2.0:status:Responder", e.getMessage());
+			assertEquals("something_is_wrong", e.getStatusMessage());
+			return;
+		}
+		Assert.fail("Expected ValidationError exception was not thrown");
+
 	}
 
 	/**

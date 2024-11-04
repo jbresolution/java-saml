@@ -593,7 +593,7 @@ public class AuthTest {
 		auth.processResponse();
 		verify(session, times(0)).invalidate();
 		assertFalse(auth.getErrors().isEmpty());
-		assertEquals("The status code of the Response was not Success, was urn:oasis:names:tc:SAML:2.0:status:Responder -> something_is_wrong", auth.getLastErrorReason());
+		assertEquals("The status code of the Response was not Success, was urn:oasis:names:tc:SAML:2.0:status:Responder", auth.getLastErrorReason());
 		assertTrue(auth.getErrors().contains("response_not_success"));
 		assertTrue(auth.getErrors().contains(Constants.STATUS_RESPONDER));
 		assertTrue(auth.getErrors().contains(Constants.STATUS_AUTHNFAILED));
